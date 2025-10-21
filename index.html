@@ -54,7 +54,12 @@
   </section>
   <section class="svg-panel">
     <div class="tabs" id="tabs"><button class="tab active" data-musculo="biceps">Biceps</button><button class="tab" data-musculo="semis">Semis</button><button class="tab" data-musculo="rac">RAC</button><button class="tab" data-musculo="aductores">Aductores</button><button class="tab" data-musculo="soleo">Sóleo</button><button class="tab" data-musculo="gemelos">Gemelos</button></div>
-    <div class="canvas"><svg id="panelSVG" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"><rect x="0" y="0" width="1600" height="900" fill="#1c1f25"/><g id="pins"></g><g id="placeholder"><rect x="80" y="80" width="1440" height="740" fill="#222832" stroke="#3a4250"/><text x="800" y="460" fill="#8fa7c7" font-size="42" text-anchor="middle" font-family="system-ui, -apple-system">Pegaremos aquí el SVG de <tspan id="tMusculo">Biceps</tspan> — <tspan id="tLado">derecho</tspan></text></g></svg></div>
+    <div class="canvas"><svg id="panelSVG" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"><rect x="0" y="0" width="1600" height="900" fill="#1c1f25"/><g id="artwork"></g>
+        <g id="pins"></g>
+        <g id="placeholder">
+          <rect x="80" y="80" width="1440" height="740" fill="#222832" stroke="#3a4250"/>
+          <text x="800" y="460" fill="#8fa7c7" font-size="42" text-anchor="middle" font-family="system-ui, -apple-system">Pegaremos aquí el SVG de <tspan id="tMusculo">Biceps</tspan> — <tspan id="tLado">derecho</tspan></text>
+        </g></svg></div>
   </section>
   <section class="caract">
     <h2>Características de la lesión</h2>
@@ -68,13 +73,72 @@
 </div>
 <script>
 (function(){
+  const BASE_SVG_PATH = './svg'; // estructura: ./svg/<musculo>/<musculo>-<lado>.svg
+
   const $ = s=>document.querySelector(s);const $$=s=>Array.from(document.querySelectorAll(s));
   let musculo='biceps';let lado='derecho';
+  const panelSVG = document.getElementById('panelSVG');
+  const artwork = document.getElementById('artwork');
+  const pins = document.getElementById('pins');
+
+  async function loadSVG(){
+    if(!artwork) return;
+    const path = `${BASE_SVG_PATH}/${musculo}/${musculo}-${lado}.svg`;
+    try{
+      const res = await fetch(path, {cache:'no-store'});
+      if(!res.ok) throw new Error(`No se pudo cargar ${path}`);
+      const txt = await res.text();
+      const doc = new DOMParser().parseFromString(txt, 'image/svg+xml');
+      const src = doc.querySelector('svg');
+      if(!src){ artwork.innerHTML=''; console.warn('SVG sin <svg> raíz'); return; }
+      // Tomamos el contenido interno del SVG fuente y lo insertamos en nuestro <g id="artwork">
+      artwork.innerHTML = '';
+      // Copiamos viewBox si existe para ajustar escala (opcional)
+      const vb = src.getAttribute('viewBox');
+      if(vb) panelSVG.setAttribute('viewBox', vb);
+      else panelSVG.setAttribute('viewBox', '0 0 1600 900');
+
+      Array.from(src.childNodes).forEach(n=>{
+        // evitamos defs con ids conflictivos si hiciera falta; por ahora insertamos directo
+        artwork.appendChild(panelSVG.ownerDocument.importNode(n, true));
+      });
+      // Ocultamos placeholder si estaba visible
+      const ph = document.getElementById('placeholder'); if(ph) ph.style.display='none';
+    }catch(err){
+      console.error(err);
+      // Si falla, mostramos placeholder y mensaje
+      const ph = document.getElementById('placeholder'); if(ph) ph.style.display='block';
+      if(artwork) artwork.innerHTML='';
+    }
+  }
+
+  function clearPins(){ if(pins){ while(pins.firstChild) pins.removeChild(pins.firstChild); } }
   const tabs=$$('#tabs .tab');
-  tabs.forEach(t=>t.addEventListener('click',()=>{tabs.forEach(o=>o.classList.remove('active'));t.classList.add('active');musculo=t.dataset.musculo;const tMus=$('#tMusculo');if(tMus)tMus.textContent=t.textContent.trim();}));
-  const selLado=$('#selLado');selLado&&selLado.addEventListener('change',()=>{lado=selLado.value;const tLado=$('#tLado');if(tLado)tLado.textContent=lado;});
+  tabs.forEach(t=>t.addEventListener('click',()=>{
+    tabs.forEach(o=>o.classList.remove('active'));
+    t.classList.add('active');
+    musculo = t.dataset.musculo;
+    const tMus = $('#tMusculo'); if(tMus) tMus.textContent = t.textContent.trim();
+    clearPins();
+    loadSVG();
+  }));
+  const selLado=$('#selLado');selLado&&selLado.addEventListener('change',()=>{
+    lado = selLado.value;
+    const tLado = $('#tLado'); if(tLado) tLado.textContent = lado;
+    clearPins();
+    loadSVG();
+  });
   const btnPDF=$('#btnPDF');btnPDF&&btnPDF.addEventListener('click',()=>window.print());
-  const btnLimpiar=$('#btnLimpiar');btnLimpiar&&btnLimpiar.addEventListener('click',()=>{$('#inpNombre').value='';$('#inpFecha').value='';$$('input[name=grado]').forEach(r=>r.checked=false);$$('#optTejido input[type=checkbox],#optAsociadas input[type=checkbox]').forEach(c=>c.checked=false);});
+  const btnLimpiar=$('#btnLimpiar');btnLimpiar&&btnLimpiar.addEventListener('click',()=>{
+    $('#inpNombre').value='';
+    $('#inpFecha').value='';
+    $$('input[name=grado]').forEach(r=>r.checked=false);
+    $$('#optTejido input[type=checkbox],#optAsociadas input[type=checkbox]').forEach(c=>c.checked=false);
+    clearPins();
+  });
+
+  // Carga inicial del primer SVG
+  loadSVG();$$('#optTejido input[type=checkbox],#optAsociadas input[type=checkbox]').forEach(c=>c.checked=false);});
 })();
 </script>
 </body>
