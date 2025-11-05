@@ -13,8 +13,12 @@
   html,body{height:100%}
   body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:#fff}
   .app{min-height:100dvh;display:grid;grid-template-rows:auto auto 1fr auto}
+
+  /* Header */
   header{padding:1rem 1.25rem;border-bottom:1px solid rgba(255,255,255,.1);background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,0))}
   header h1{margin:0;font-size:1.35rem;letter-spacing:.2px}
+
+  /* Panel de datos (fila scrolleable en mobile) */
   .panel-datos{background:var(--panel);color:var(--ink);padding:1rem 1.25rem;border-bottom:1px solid var(--line);display:flex;flex-wrap:nowrap;align-items:end;gap:.8rem;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
   .panel-datos .fld{min-width:220px}
   .panel-datos .actions{min-width:max-content;display:flex;gap:.5rem;margin-left:auto}
@@ -24,12 +28,18 @@
   .btn{appearance:none;border:none;border-radius:.6rem;padding:.65rem 1rem;font-weight:700;cursor:pointer}
   .btn.primary{background:var(--accent);color:#0d1117}
   .btn.ghost{background:transparent;border:1px solid var(--accent-weak);color:#1b2435}
+
+  /* Panel SVG + Tabs */
   .svg-panel{background:var(--panel);color:var(--ink);padding:0 1.25rem 1rem 1.25rem;border-bottom:1px solid var(--line)}
   .tabs{display:flex;gap:.25rem;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;padding-top:.6rem;position:relative;z-index:2;background:#fff;border-bottom:1px solid var(--line)}
   .tab{appearance:none;border:1px solid var(--line);background:#f6f8fb;color:#1b2435;padding:.55rem .9rem;border-top-left-radius:.75rem;border-top-right-radius:.75rem;cursor:pointer;font-weight:700;flex:0 0 auto;-webkit-tap-highlight-color: rgba(0,0,0,0);}
   .tab.active{background:#fff;border-bottom-color:transparent;box-shadow:0 -6px 24px rgba(0,0,0,.12)}
   .canvas{border:1px solid var(--line);border-top:none;border-radius:0 0 .9rem .9rem;overflow:hidden;background:#1c1f25;position:relative;z-index:1}
   .canvas svg{display:block;width:100%;height:auto}
+  #placeholder text{user-select:none}
+  #phMsg{fill:#c7d6eb;font-size:18px}
+
+  /* Panel características (siempre 3 columnas) */
   .caract{background:var(--panel);color:var(--ink);padding:1rem 1.25rem 1.25rem;border-top:1px solid var(--line)}
   .caract h2{margin:.2rem 0 1rem 0;font-size:1.05rem}
   .cards{display:grid;grid-template-columns:repeat(3,minmax(260px,1fr));gap:1rem;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
@@ -37,13 +47,25 @@
   .card h3{margin:.1rem 0 .6rem 0;font-size:.95rem;color:#1b2435}
   .opt{display:grid;gap:.45rem}
   .opt label{display:flex;align-items:center;gap:.5rem}
+
   footer{padding:.8rem 1.25rem;color:#97a6bf;font-size:.9rem;border-top:1px solid rgba(255,255,255,.1)}
-  @media print{@page{size:A4;margin:12mm 10mm 14mm 10mm}body{background:#fff;color:#000}header{color:#000;border-bottom:1px solid #ddd}.btn{display:none}footer{color:#333;border-top:1px solid #ddd}}
+
+  /* Impresión A4 */
+  @media print{
+    @page{size:A4;margin:12mm 10mm 14mm 10mm}
+    body{background:#fff;color:#000}
+    header{color:#000;border-bottom:1px solid #ddd}
+    .btn{display:none}
+    footer{color:#333;border-top:1px solid #ddd}
+  }
 </style>
 </head>
 <body>
 <div class="app">
+  <!-- HEADER -->
   <header><h1>Esquema de lesión muscular</h1></header>
+
+  <!-- PANEL DE DATOS -->
   <section class="panel-datos">
     <div class="fld"><label>Nombre y Apellido</label><input id="inpNombre" placeholder="Apellido, Nombre"/></div>
     <div class="fld"><label>Fecha de lesión</label><input id="inpFecha" type="date"/></div>
@@ -51,94 +73,174 @@
     <div class="fld"></div>
     <div class="actions"><button class="btn ghost" id="btnLimpiar">Limpiar</button><button class="btn primary" id="btnPDF">Generar PDF</button></div>
   </section>
+
+  <!-- PANEL SVG + TABS -->
   <section class="svg-panel">
-    <div class="tabs" id="tabs"><button class="tab active" data-musculo="biceps">Biceps</button><button class="tab" data-musculo="semis">Semis</button><button class="tab" data-musculo="rac">RAC</button><button class="tab" data-musculo="aductores">Aductores</button><button class="tab" data-musculo="soleo">Sóleo</button><button class="tab" data-musculo="gemelos">Gemelos</button></div>
-    <div class="canvas"><svg id="panelSVG" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"><rect x="0" y="0" width="1600" height="900" fill="#1c1f25"/><g id="artwork"></g>
+    <div class="tabs" id="tabs">
+      <button class="tab" data-musculo="biceps">Biceps</button>
+      <button class="tab" data-musculo="semis">Semis</button>
+      <button class="tab active" data-musculo="rac">RAC</button>
+      <button class="tab" data-musculo="aductores">Aductores</button>
+      <button class="tab" data-musculo="soleo">Sóleo</button>
+      <button class="tab" data-musculo="gemelos">Gemelos</button>
+    </div>
+    <div class="canvas">
+      <svg id="panelSVG" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <rect x="0" y="0" width="1600" height="900" fill="#1c1f25"/>
+        <g id="artwork"></g>
         <g id="pins"></g>
         <g id="placeholder">
           <rect x="80" y="80" width="1440" height="740" fill="#222832" stroke="#3a4250"/>
-          <text x="800" y="460" fill="#8fa7c7" font-size="42" text-anchor="middle" font-family="system-ui, -apple-system">Pegaremos aquí el SVG de <tspan id="tMusculo">Biceps</tspan> — <tspan id="tLado">derecho</tspan></text>
-        </g></svg></div>
+          <text x="800" y="430" fill="#8fa7c7" font-size="42" text-anchor="middle" font-family="system-ui, -apple-system">Pegaremos aquí el SVG de <tspan id="tMusculo">RAC</tspan> — <tspan id="tLado">derecho</tspan></text>
+          <text id="phMsg" x="800" y="490" text-anchor="middle" font-family="system-ui, -apple-system">Subí el archivo faltante a ./svg/<tspan id="phMus">rac</tspan>/<tspan id="phFile">rac-derecho.svg</tspan></text>
+        </g>
+      </svg>
+    </div>
   </section>
+
+  <!-- PANEL CARACTERÍSTICAS -->
   <section class="caract">
     <h2>Características de la lesión</h2>
     <div class="cards">
-      <div class="card"><h3>Grado</h3><div class="opt" id="optGrado"><label><input type="radio" name="grado" value="1"> Grado 1 (a,b)</label><label><input type="radio" name="grado" value="2"> Grado 2 (a,b,c)</label><label><input type="radio" name="grado" value="3"> Grado 3 (a,b,c)</label><label><input type="radio" name="grado" value="4"> Grado 4 (c)</label></div></div>
-      <div class="card"><h3>Tejido afectado</h3><div class="opt" id="optTejido"><label><input type="checkbox" value="miofascial"> Miofascial (a)</label><label><input type="checkbox" value="miotendinoso"> Miotendinoso (b)</label><label><input type="checkbox" value="tendinoso"> Tendinoso (c)</label><label><input type="checkbox" value="intramuscular"> Intramuscular</label></div></div>
-      <div class="card"><h3>Lesiones asociadas</h3><div class="opt" id="optAsociadas"><label><input type="checkbox" value="lamina"> Lámina líquida</label><label><input type="checkbox" value="coleccion"> Colección</label><label><input type="checkbox" value="cicatriz"> Cicatriz fibrosa</label><label><input type="checkbox" value="calcificaciones"> Calcificaciones</label><label><input type="checkbox" value="recidiva"> Recidiva</label></div></div>
+      <div class="card">
+        <h3>Grado</h3>
+        <div class="opt" id="optGrado">
+          <label><input type="radio" name="grado" value="1"> Grado 1 (a,b)</label>
+          <label><input type="radio" name="grado" value="2"> Grado 2 (a,b,c)</label>
+          <label><input type="radio" name="grado" value="3"> Grado 3 (a,b,c)</label>
+          <label><input type="radio" name="grado" value="4"> Grado 4 (c)</label>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Tejido afectado</h3>
+        <div class="opt" id="optTejido">
+          <label><input type="checkbox" value="miofascial"> Miofascial (a)</label>
+          <label><input type="checkbox" value="miotendinoso"> Miotendinoso (b)</label>
+          <label><input type="checkbox" value="tendinoso"> Tendinoso (c)</label>
+          <label><input type="checkbox" value="intramuscular"> Intramuscular</label>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Lesiones asociadas</h3>
+        <div class="opt" id="optAsociadas">
+          <label><input type="checkbox" value="lamina"> Lámina líquida</label>
+          <label><input type="checkbox" value="coleccion"> Colección</label>
+          <label><input type="checkbox" value="cicatriz"> Cicatriz fibrosa</label>
+          <label><input type="checkbox" value="calcificaciones"> Calcificaciones</label>
+          <label><input type="checkbox" value="recidiva"> Recidiva</label>
+        </div>
+      </div>
     </div>
   </section>
+
   <footer>Desarrollado por Santiago Grosso</footer>
 </div>
+
 <script>
 (function(){
   const BASE_SVG_PATH = './svg'; // estructura: ./svg/<musculo>/<musculo>-<lado>.svg
 
   const $ = s=>document.querySelector(s);const $$=s=>Array.from(document.querySelectorAll(s));
-  let musculo='biceps';let lado='derecho';
+  // Default a RAC porque sabemos que ese archivo es el primero que vas a subir
+  let musculo='rac'; let lado='derecho';
+
   const panelSVG = document.getElementById('panelSVG');
-  const artwork = document.getElementById('artwork');
-  const pins = document.getElementById('pins');
+  const artwork  = document.getElementById('artwork');
+  const pins     = document.getElementById('pins');
+  const ph       = document.getElementById('placeholder');
+  const phMus    = document.getElementById('phMus');
+  const phFile   = document.getElementById('phFile');
+  const tMus     = document.getElementById('tMusculo');
+  const tLado    = document.getElementById('tLado');
 
   async function loadSVG(){
     if(!artwork) return;
     const path = `${BASE_SVG_PATH}/${musculo}/${musculo}-${lado}.svg`;
+    // Actualizar textos del placeholder para que el usuario sepa qué subir
+    if(phMus)  phMus.textContent  = musculo;
+    if(phFile) phFile.textContent = `${musculo}-${lado}.svg`;
+    if(tMus)   tMus.textContent   = (document.querySelector(`.tab[data-musculo="${musculo}"]`)?.textContent||musculo).trim();
+    if(tLado)  tLado.textContent  = lado;
+
     try{
       const res = await fetch(path, {cache:'no-store'});
-      if(!res.ok) throw new Error(`No se pudo cargar ${path}`);
+      if(!res.ok){
+        // No arrojamos error: mostramos placeholder y registramos advertencia sin stack
+        if(ph) ph.style.display='block';
+        artwork.innerHTML='';
+        console.warn(`[SVG] No encontrado: ${path}`);
+        return;
+      }
       const txt = await res.text();
       const doc = new DOMParser().parseFromString(txt, 'image/svg+xml');
       const src = doc.querySelector('svg');
-      if(!src){ artwork.innerHTML=''; console.warn('SVG sin <svg> raíz'); return; }
-      // Tomamos el contenido interno del SVG fuente y lo insertamos en nuestro <g id="artwork">
+      if(!src){
+        if(ph) ph.style.display='block';
+        artwork.innerHTML='';
+        console.warn(`[SVG] Archivo sin <svg> raíz: ${path}`);
+        return;
+      }
+      // Limpiar y pegar contenido
       artwork.innerHTML = '';
-      // Copiamos viewBox si existe para ajustar escala (opcional)
+      // Ajustar viewBox si existe
       const vb = src.getAttribute('viewBox');
-      if(vb) panelSVG.setAttribute('viewBox', vb);
-      else panelSVG.setAttribute('viewBox', '0 0 1600 900');
-
-      Array.from(src.childNodes).forEach(n=>{
-        // evitamos defs con ids conflictivos si hiciera falta; por ahora insertamos directo
-        artwork.appendChild(panelSVG.ownerDocument.importNode(n, true));
-      });
-      // Ocultamos placeholder si estaba visible
-      const ph = document.getElementById('placeholder'); if(ph) ph.style.display='none';
+      panelSVG.setAttribute('viewBox', vb ? vb : '0 0 1600 900');
+      Array.from(src.childNodes).forEach(n=> artwork.appendChild(panelSVG.ownerDocument.importNode(n, true)));
+      if(ph) ph.style.display='none';
     }catch(err){
-      console.error(err);
-      // Si falla, mostramos placeholder y mensaje
-      const ph = document.getElementById('placeholder'); if(ph) ph.style.display='block';
-      if(artwork) artwork.innerHTML='';
+      // Errores de red u otros: no arrojamos stack, dejamos instrucción en placeholder
+      if(ph) ph.style.display='block';
+      artwork.innerHTML='';
+      console.warn(`[SVG] Error al cargar ${path}:`, err?.message||err);
     }
   }
 
   function clearPins(){ if(pins){ while(pins.firstChild) pins.removeChild(pins.firstChild); } }
-  const tabs=$$('#tabs .tab');
-  tabs.forEach(t=>t.addEventListener('click',()=>{
-    tabs.forEach(o=>o.classList.remove('active'));
-    t.classList.add('active');
-    musculo = t.dataset.musculo;
-    const tMus = $('#tMusculo'); if(tMus) tMus.textContent = t.textContent.trim();
-    clearPins();
-    loadSVG();
-  }));
-  const selLado=$('#selLado');selLado&&selLado.addEventListener('change',()=>{
-    lado = selLado.value;
-    const tLado = $('#tLado'); if(tLado) tLado.textContent = lado;
-    clearPins();
-    loadSVG();
-  });
-  const btnPDF=$('#btnPDF');btnPDF&&btnPDF.addEventListener('click',()=>window.print());
-  const btnLimpiar=$('#btnLimpiar');btnLimpiar&&btnLimpiar.addEventListener('click',()=>{
-    $('#inpNombre').value='';
-    $('#inpFecha').value='';
-    $$('input[name=grado]').forEach(r=>r.checked=false);
-    $$('#optTejido input[type=checkbox],#optAsociadas input[type=checkbox]').forEach(c=>c.checked=false);
+
+  // Delegación para tabs (más robusto en mobile)
+  const tabsEl = document.getElementById('tabs');
+  if(tabsEl){
+    tabsEl.addEventListener('click',(e)=>{
+      const t = e.target.closest('.tab');
+      if(!t) return;
+      document.querySelectorAll('#tabs .tab').forEach(o=>o.classList.remove('active'));
+      t.classList.add('active');
+      musculo = t.dataset.musculo;
+      clearPins();
+      loadSVG();
+    });
+  }
+
+  // Cambio de lado
+  const selLado = document.getElementById('selLado');
+  if(selLado){
+    selLado.addEventListener('change',()=>{ lado = selLado.value; clearPins(); loadSVG(); });
+  }
+
+  // Botones
+  const btnPDF    = document.getElementById('btnPDF');    btnPDF   && btnPDF.addEventListener('click',()=>window.print());
+  const btnLimpiar= document.getElementById('btnLimpiar'); btnLimpiar&& btnLimpiar.addEventListener('click',()=>{
+    const nombre = document.getElementById('inpNombre'); if(nombre) nombre.value='';
+    const fecha  = document.getElementById('inpFecha');  if(fecha)  fecha.value='';
+    $$('#optGrado input[type=radio]').forEach(r=> r.checked=false);
+    $$('#optTejido input[type=checkbox],#optAsociadas input[type=checkbox]').forEach(c=> c.checked=false);
     clearPins();
   });
 
-  // Carga inicial del primer SVG
+  // ====== TESTS (no dependen de archivos externos) ======
+  function assert(cond, msg){ if(!cond){ console.error('[TEST FAIL]', msg); return false;} console.log('[TEST OK]', msg); return true; }
+  const tests = [
+    ()=>assert(!!document.getElementById('tabs'), 'Existe barra de tabs'),
+    ()=>assert(document.querySelectorAll('#tabs .tab').length===6, 'Hay 6 pestañas'),
+    ()=>assert(!!document.getElementById('selLado'), 'Existe selector de lado'),
+    ()=>assert(!!document.getElementById('panelSVG'), 'Existe panel SVG'),
+    ()=>assert(typeof loadSVG === 'function', 'loadSVG está definida'),
+    ()=>{ try{ const p = loadSVG(); assert(p instanceof Promise || p===undefined, 'loadSVG no arroja error sin archivo'); return true; }catch(e){ return assert(false, 'loadSVG no debería arrojar'); } },
+  ];
+  tests.forEach(t=>{ try{ t(); }catch(e){ console.error('[TEST ERROR]', e); } });
+
+  // Carga inicial (RAC derecho)
   loadSVG();
-  $$('#optTejido input[type=checkbox],#optAsociadas input[type=checkbox]').forEach(c=>c.checked=false);
 })();
 </script>
 </body>
