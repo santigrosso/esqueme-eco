@@ -113,15 +113,24 @@
   }
 
   function clearPins(){ if(pins){ while(pins.firstChild) pins.removeChild(pins.firstChild); } }
-  const tabs=$$('#tabs .tab');
-  tabs.forEach(t=>t.addEventListener('click',()=>{
-    tabs.forEach(o=>o.classList.remove('active'));
+ const tabsEl = document.getElementById('tabs');
+if (tabsEl) {
+  tabsEl.addEventListener('click', (e) => {
+    const t = e.target.closest('.tab');
+    if (!t) return;
+
+    document.querySelectorAll('#tabs .tab').forEach(o => o.classList.remove('active'));
     t.classList.add('active');
+
     musculo = t.dataset.musculo;
-    const tMus = $('#tMusculo'); if(tMus) tMus.textContent = t.textContent.trim();
+    const tMus = document.getElementById('tMusculo');
+    if (tMus) tMus.textContent = t.textContent.trim();
+
     clearPins();
     loadSVG();
-  }));
+  });
+}
+
   const selLado=$('#selLado');selLado&&selLado.addEventListener('change',()=>{
     lado = selLado.value;
     const tLado = $('#tLado'); if(tLado) tLado.textContent = lado;
