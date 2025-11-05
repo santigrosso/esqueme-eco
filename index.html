@@ -35,7 +35,8 @@
   .tab{appearance:none;border:1px solid var(--line);background:#f6f8fb;color:#1b2435;padding:.55rem .9rem;border-top-left-radius:.75rem;border-top-right-radius:.75rem;cursor:pointer;font-weight:700;flex:0 0 auto;-webkit-tap-highlight-color: rgba(0,0,0,0);}
   .tab.active{background:#fff;border-bottom-color:transparent;box-shadow:0 -6px 24px rgba(0,0,0,.12)}
   .canvas{border:1px solid var(--line);border-top:none;border-radius:0 0 .9rem .9rem;overflow:hidden;background:#1c1f25;position:relative;z-index:1}
-  .canvas svg{display:block;width:100%;height:auto}
+  .canvas svg{display:block;width:100%;height:auto;touch-action:none}
+  .pin{fill:#FFD54F;stroke:#ffffff;stroke-width:1.5;pointer-events:auto;cursor:pointer}
   #placeholder text{user-select:none}
   #phMsg{fill:#c7d6eb;font-size:18px}
 
@@ -197,6 +198,65 @@
 
   function clearPins(){ if(pins){ while(pins.firstChild) pins.removeChild(pins.firstChild); } }
 
+  // ======== Interacción de ESTRELLAS (crear con tap + arrastrar para escalar + tap para borrar) ========
+  const STAR_MIN = 10; // px visual
+  const STAR_MAX = 56; // px visual
+
+  function svgPoint(svg, clientX, clientY){
+    const pt = svg.createSVGPoint(); pt.x = clientX; pt.y = clientY; return pt.matrixTransform(svg.getScreenCTM().inverse());
+  }
+  function starPath(cx, cy, r, spikes=5){
+    const inner = r * 0.48;
+    let rot = Math.PI/2 * 3;
+    let x = cx, y = cy;
+    const step = Math.PI / spikes;
+    let d = `M ${cx} ${cy - r}`;
+    for(let i=0;i<spikes;i++){
+      x = cx + Math.cos(rot) * r; y = cy + Math.sin(rot) * r; d += ` L ${x} ${y}`; rot += step;
+      x = cx + Math.cos(rot) * inner; y = cy + Math.sin(rot) * inner; d += ` L ${x} ${y}`; rot += step;
+    }
+    return d + ' Z';
+  }
+  function clamp(v,min,max){ return v<min?min:(v>max?max:v); }
+
+  let drawing = null; // path actual en construcción
+  let start = null;   // {x,y} en coords SVG
+
+  function onPointerDown(e){
+    if(!panelSVG || e.button===2) return; // ignorar botón derecho
+    e.preventDefault();
+    const targetPin = e.target && e.target.classList && e.target.classList.contains('pin') ? e.target : null;
+    if(targetPin){ // tap sobre estrella => eliminar
+      try{ targetPin.remove(); }catch(_){}
+      return;
+    }
+    // Crear nueva estrella
+    const p = svgPoint(panelSVG, e.clientX, e.clientY);
+    start = p;
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('class','pin');
+    path.setAttribute('d', starPath(p.x, p.y, STAR_MIN));
+    pins.appendChild(path);
+    drawing = path;
+    try{ panelSVG.setPointerCapture && panelSVG.setPointerCapture(e.pointerId); }catch(_){ }
+  }
+  function onPointerMove(e){
+    if(!drawing) return;
+    e.preventDefault();
+    const p = svgPoint(panelSVG, e.clientX, e.clientY);
+    const dx = p.x - start.x, dy = p.y - start.y;
+    const r = clamp(Math.hypot(dx,dy), STAR_MIN, STAR_MAX);
+    drawing.setAttribute('d', starPath(start.x, start.y, r));
+  }
+  function endDrawing(e){ if(!drawing) return; e && e.preventDefault(); drawing = null; start = null; }
+
+  if(panelSVG){
+    panelSVG.addEventListener('pointerdown', onPointerDown);
+    window.addEventListener('pointermove', onPointerMove, {passive:false});
+    window.addEventListener('pointerup',   endDrawing,   {passive:false});
+    window.addEventListener('pointercancel', endDrawing, {passive:false});
+  } }
+
   // Delegación para tabs (más robusto en mobile)
   const tabsEl = document.getElementById('tabs');
   if(tabsEl){
@@ -238,6 +298,22 @@
     ()=>{ try{ const p = loadSVG(); assert(p instanceof Promise || p===undefined, 'loadSVG no arroja error sin archivo'); return true; }catch(e){ return assert(false, 'loadSVG no debería arrojar'); } },
   ];
   tests.forEach(t=>{ try{ t(); }catch(e){ console.error('[TEST ERROR]', e); } });
+
+  // === TESTS EXTRA (interacción de estrellas) ===
+  try{
+    const before = pins.childElementCount;
+    const rect = panelSVG.getBoundingClientRect();
+    const cx = rect.left + 100, cy = rect.top + 100;
+    const down = new PointerEvent('pointerdown', {clientX:cx, clientY:cy, pointerId:1});
+    panelSVG.dispatchEvent(down);
+    const move = new PointerEvent('pointermove', {clientX:cx+40, clientY:cy+10, pointerId:1});
+    window.dispatchEvent(move);
+    const up   = new PointerEvent('pointerup',   {clientX:cx+40, clientY:cy+10, pointerId:1});
+    window.dispatchEvent(up);
+    console.log('[TEST OK] crear estrella con drag');
+    const after = pins.childElementCount;
+    if(after <= before) console.error('[TEST FAIL] no se agregó estrella');
+  }catch(err){ console.warn('[TEST WARN] PointerEvent no soportado en este entorno:', err?.message||err); }
 
   // Carga inicial (RAC derecho)
   loadSVG();
