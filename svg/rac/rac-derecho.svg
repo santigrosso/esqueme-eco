@@ -80,11 +80,11 @@
       }
 
       .cls-20 {
-        letter-spacing: -0.04em;
+        letter-spacing: -0.03em;
       }
 
       .cls-21 {
-        letter-spacing: -0.03em;
+        letter-spacing: -0.04em;
       }
     </style>
   </defs>
@@ -168,14 +168,14 @@
         <path class="cls-11" d="M297.2,199.22A16.69,16.69,0,0,1,302,201c1.75,1.17,2.11,4.29,2.75,5.95,1,2.69,1.4,9.64-2.42,11.39s-4.09-1.72-2.61-2.42,3.56-5.37,2.58-7.43-1.39-5.38-4.36-6.64S297.2,199.22,297.2,199.22Z"/>
       </g>
       <rect class="cls-1" y="432.45" width="586.31" height="63.75" transform="translate(586.31 928.66) rotate(-180)"/>
-      <text class="cls-18" transform="translate(45.98 461.53)">TENDÓN DIREC<tspan class="cls-19" x="62.4" y="0">T</tspan><tspan x="67.27" y="0">O -</tspan><tspan class="cls-20" x="78.66" y="0"> </tspan><tspan x="80.49" y="0">APONEUROSIS</tspan><tspan class="cls-20" x="140.63" y="0"> </tspan><tspan x="142.46" y="0">ANTERIOR</tspan></text>
-      <text class="cls-18" transform="translate(334.4 461.53)">TENDÓN INDIREC<tspan class="cls-19" x="70.6" y="0">T</tspan><tspan x="75.46" y="0">O - SEPTUM CENTRA</tspan><tspan class="cls-21" x="159.28" y="0">L</tspan></text>
       <text class="cls-18" transform="translate(334.7 484.82)">MÚSCULO</text>
+      <text class="cls-18" transform="translate(334.7 463.08)">TENDÓN INDIREC<tspan class="cls-19" x="70.6" y="0">T</tspan><tspan x="75.46" y="0">O - SEPTUM CENTRA</tspan><tspan class="cls-20" x="159.28" y="0">L</tspan></text>
       <rect class="cls-12" x="30.77" y="451.33" width="13.3" height="13.3"/>
       <rect class="cls-11" x="319.19" y="451.33" width="13.3" height="13.3"/>
       <rect class="cls-7" x="30.77" y="474.62" width="13.3" height="13.3"/>
       <rect class="cls-8" x="319.49" y="474.62" width="13.3" height="13.3"/>
       <text class="cls-18" transform="translate(45.98 484.82)">APONEUROSIS POSTERIOR</text>
+      <text class="cls-18" transform="translate(45.98 462.01)">TENDÓN DIREC<tspan class="cls-19" x="62.4" y="0">T</tspan><tspan x="67.27" y="0">O -</tspan><tspan class="cls-21" x="78.66" y="0"> </tspan><tspan x="80.49" y="0">APONEUROSIS</tspan><tspan class="cls-21" x="140.63" y="0"> </tspan><tspan x="142.46" y="0">ANTERIOR</tspan></text>
     </g>
   </g>
 </svg>
