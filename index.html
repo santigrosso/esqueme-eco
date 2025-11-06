@@ -64,6 +64,10 @@
   /* Estilos del interruptor */
   #toggleMark:checked{background:#5B7EAE;border-color:#5B7EAE}
   #toggleMark:checked + .knob{left:19px}
+  /* Switch styles (robust) */
+  #markSwitch{position:relative}
+  #toggleMark:checked ~ .track{background:#5B7EAE;border-color:#5B7EAE}
+  #toggleMark:checked ~ .thumb{left:21px}
 </style>
 </head>
 <body>
@@ -91,16 +95,6 @@
       </label>
       <div>
         <button class="btn ghost" id="btnClearPins" title="Eliminar todas las estrellas">Limpiar estrellas</button>
-      </div>
-    </div>
-    <div style="display:flex;gap:.75rem;align-items:center;justify-content:space-between;padding:.6rem 0 .2rem 0">
-      <div style="display:flex;gap:1rem;align-items:center;color:#1b2435">
-        <strong>Modo:</strong>
-        <label style="display:flex;gap:.35rem;align-items:center"><input type="radio" name="modo" value="nav" checked> Navegar / Zoom</label>
-        <label style="display:flex;gap:.35rem;align-items:center"><input type="radio" name="modo" value="mark"> Marcar (★)</label>
-      </div>
-      <div style="display:flex;gap:.5rem">
-        <button class="btn ghost" id="btnResetView" title="Reiniciar zoom y posición">Reset vista</button>
       </div>
     </div>
     <div class="tabs" id="tabs">
@@ -288,13 +282,13 @@
       $$('#tabs .tab').forEach(o=>o.classList.remove('active'));
       t.classList.add('active');
       musculo = t.getAttribute('data-musculo');
-      clearPins(); resetView(); loadSVG();
+      clearPins(); loadSVG();
     });
   }
 
   // Lado
   const selLado = document.getElementById('selLado');
-  if(selLado){ selLado.addEventListener('change', ()=>{ lado = selLado.value; clearPins(); resetView(); loadSVG(); }); }
+  if(selLado){ selLado.addEventListener('change', ()=>{ lado = selLado.value; clearPins(); loadSVG(); }); }
 
   // Botones generales
   const btnPDF    = document.getElementById('btnPDF');    if(btnPDF)    btnPDF.addEventListener('click', ()=>window.print());
@@ -303,7 +297,7 @@
     const fecha=$('#inpFecha');   if(fecha)  fecha.value='';
     $$('#optGrado input[type=radio]').forEach(r=>r.checked=false);
     $$('#optTejido input[type=checkbox],#optAsociadas input[type=checkbox]').forEach(c=>c.checked=false);
-    clearPins(); resetView();
+    clearPins();
   });
 
   // ===== TESTS =====
@@ -333,3 +327,4 @@
 </script>
 </body>
 </html>
+
