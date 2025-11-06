@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Esquema de lesión muscular — Wireframe v2 (modo navegar/marcar + zoom)</title>
+<title>Esquema de lesión muscular — Wireframe v1 (fix CSP + tests)</title>
 <style>
   :root{
     --bg:#0f1115; --ink:#0e1320; --muted:#6b7890; --accent:#5B7EAE; --accent-weak:#8fa7c7;
@@ -61,6 +61,9 @@
     .btn{display:none}
     footer{color:#333;border-top:1px solid #ddd}
   }
+  /* Estilos del interruptor */
+  #toggleMark:checked{background:#5B7EAE;border-color:#5B7EAE}
+  #toggleMark:checked + .knob{left:19px}
 </style>
 </head>
 <body>
@@ -79,6 +82,17 @@
 
   <!-- PANEL SVG + TABS -->
   <section class="svg-panel">
+    <!-- Barra de opciones: interruptor para marcar y botón limpiar estrellas -->
+    <div class="toolbar" style="display:flex;gap:.75rem;align-items:center;justify-content:space-between;padding:.6rem 0 .2rem 0;color:#1b2435">
+      <label id="markSwitch" style="position:relative;display:flex;align-items:center;gap:.5rem;user-select:none;cursor:pointer">
+        <input id="toggleMark" type="checkbox" style="appearance:none;width:42px;height:24px;background:#d4dde9;border-radius:999px;position:relative;outline:none;border:1px solid #b9c6d9">
+        <span class="knob" style="position:absolute;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);left:3px;top:50%;transform:translateY(-50%);"></span>
+        <span style="margin-left:48px;font-weight:600;">Activar marcas (★)</span>
+      </label>
+      <div>
+        <button class="btn ghost" id="btnClearPins" title="Eliminar todas las estrellas">Limpiar estrellas</button>
+      </div>
+    </div>
     <div style="display:flex;gap:.75rem;align-items:center;justify-content:space-between;padding:.6rem 0 .2rem 0">
       <div style="display:flex;gap:1rem;align-items:center;color:#1b2435">
         <strong>Modo:</strong>
@@ -87,7 +101,6 @@
       </div>
       <div style="display:flex;gap:.5rem">
         <button class="btn ghost" id="btnResetView" title="Reiniciar zoom y posición">Reset vista</button>
-        <button class="btn ghost" id="btnClearPins" title="Eliminar todas las estrellas">Limpiar estrellas</button>
       </div>
     </div>
     <div class="tabs" id="tabs">
@@ -153,122 +166,166 @@
 </div>
 
 <script>
-(function(){
-  // ===== Compat: var en lugar de const/let =====
-  var BASE_SVG_PATH = './svg'; // ./svg/<musculo>/<musculo>-<lado>.svg
-  var $ = function(s){ return document.querySelector(s); };
-  var $$ = function(s){ return Array.from(document.querySelectorAll(s)); };
-  var musculo='rac', lado='derecho';
+(() => {
+  // ===== Config =====
+  const BASE_SVG_PATH = './svg'; // ./svg/<musculo>/<musculo>-<lado>.svg
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => Array.from(document.querySelectorAll(s));
+  let musculo = 'rac';
+  let lado = 'derecho';
 
-  var panelSVG = document.getElementById('panelSVG');
-  var viewport = document.getElementById('viewport');
-  var artwork  = document.getElementById('artwork');
-  var pins     = document.getElementById('pins');
-  var ph       = document.getElementById('placeholder');
-  var phMus    = document.getElementById('phMus');
-  var phFile   = document.getElementById('phFile');
-  var tMus     = document.getElementById('tMusculo');
-  var tLado    = document.getElementById('tLado');
+  // DOM refs
+  const panelSVG = document.getElementById('panelSVG');
+  const viewport = document.getElementById('viewport');
+  const artwork  = document.getElementById('artwork');
+  const pins     = document.getElementById('pins');
+  const ph       = document.getElementById('placeholder');
+  const phMus    = document.getElementById('phMus');
+  const phFile   = document.getElementById('phFile');
+  const tMus     = document.getElementById('tMusculo');
+  const tLado    = document.getElementById('tLado');
 
+  // ===== Carga de SVG =====
   function loadSVG(){
     if(!artwork) return Promise.resolve();
-    var path = BASE_SVG_PATH + '/' + musculo + '/' + musculo + '-' + lado + '.svg';
+    const path = `${BASE_SVG_PATH}/${musculo}/${musculo}-${lado}.svg`;
     if(phMus)  phMus.textContent  = musculo;
-    if(phFile) phFile.textContent = musculo + '-' + lado + '.svg';
-    if(tMus){ var tabEl = document.querySelector('.tab[data-musculo="' + musculo + '"]'); tMus.textContent = (tabEl ? tabEl.textContent : musculo).trim(); }
+    if(phFile) phFile.textContent = `${musculo}-${lado}.svg`;
+    if(tMus){ const tabEl = document.querySelector(`.tab[data-musculo="${musculo}"]`); tMus.textContent = (tabEl ? tabEl.textContent : musculo).trim(); }
     if(tLado)  tLado.textContent  = lado;
 
-    return fetch(path,{cache:'no-store'}).then(function(res){
-      if(!res.ok){ if(ph) ph.style.display='block'; artwork.innerHTML=''; console.warn('[SVG] No encontrado: '+path); return null; }
+    return fetch(path,{cache:'no-store'}).then(res => {
+      if(!res.ok){ if(ph) ph.style.display='block'; artwork.innerHTML=''; console.warn('[SVG] No encontrado:', path); return null; }
       return res.text();
-    }).then(function(txt){
-      if(txt===null){ return; }
-      var doc = new DOMParser().parseFromString(txt,'image/svg+xml');
-      var src = doc.querySelector('svg');
-      if(!src){ if(ph) ph.style.display='block'; artwork.innerHTML=''; console.warn('[SVG] Sin <svg> raíz: '+path); return; }
+    }).then(txt => {
+      if(txt===null) return;
+      const doc = new DOMParser().parseFromString(txt,'image/svg+xml');
+      const src = doc.querySelector('svg');
+      if(!src){ if(ph) ph.style.display='block'; artwork.innerHTML=''; console.warn('[SVG] Sin <svg> raíz:', path); return; }
       artwork.innerHTML='';
-      var vb = src.getAttribute('viewBox'); panelSVG.setAttribute('viewBox', vb ? vb : '0 0 1600 900');
-      Array.prototype.forEach.call(src.childNodes, function(n){ artwork.appendChild(panelSVG.ownerDocument.importNode(n,true)); });
+      const vb = src.getAttribute('viewBox'); panelSVG.setAttribute('viewBox', vb ? vb : '0 0 1600 900');
+      Array.from(src.childNodes).forEach(n => artwork.appendChild(panelSVG.ownerDocument.importNode(n,true)));
       if(ph) ph.style.display='none';
-    }).catch(function(err){ if(ph) ph.style.display='block'; artwork.innerHTML=''; console.warn('[SVG] Error al cargar '+path+':', err && err.message ? err.message : err); });
+    }).catch(err => { if(ph) ph.style.display='block'; artwork.innerHTML=''; console.warn('[SVG] Error al cargar', path, err?.message||err); });
   }
 
+  // ===== Estrellas =====
   function clearPins(){ if(pins){ while(pins.firstChild) pins.removeChild(pins.firstChild); } }
+  const STAR_MIN = 10, STAR_MAX = 56;
+  const svgPoint = (svg, clientX, clientY) => {
+    const pt = svg.createSVGPoint(); pt.x=clientX; pt.y=clientY; return pt.matrixTransform(svg.getScreenCTM().inverse());
+  };
+  const starPath = (cx,cy,r,spikes=5) => {
+    const inner=r*0.48; let rot=Math.PI/2*3, x=cx, y=cy, step=Math.PI/spikes, d=`M ${cx} ${cy-r}`;
+    for(let i=0;i<spikes;i++){ x=cx+Math.cos(rot)*r; y=cy+Math.sin(rot)*r; d+=` L ${x} ${y}`; rot+=step; x=cx+Math.cos(rot)*inner; y=cy+Math.sin(rot)*inner; d+=` L ${x} ${y}`; rot+=step; }
+    return d+' Z';
+  };
 
-  /* ===== Pan & Zoom (modo Navegar) ===== */
-  var mode='nav';
-  var scale=1, MIN_Z=0.6, MAX_Z=3; var tx=0, ty=0;
-  function applyView(){ if(viewport){ viewport.setAttribute('transform','translate('+tx+','+ty+') scale('+scale+')'); } }
-  function svgPoint(svg, clientX, clientY){ var pt=svg.createSVGPoint(); pt.x=clientX; pt.y=clientY; return pt.matrixTransform(svg.getScreenCTM().inverse()); }
+  // Modo (nav|mark) y toggle de marcado
+  let mode = 'nav';
+  let markEnabled = false; // interruptor arriba del SVG
 
-  function onWheel(e){ if(!panelSVG) return; e.preventDefault(); var p=svgPoint(panelSVG,e.clientX,e.clientY); var dz=-e.deltaY*0.0012; var newS=Math.min(MAX_Z,Math.max(MIN_Z,scale*(1+dz))); var k=newS/scale; tx=p.x - k*(p.x-tx); ty=p.y - k*(p.y-ty); scale=newS; applyView(); }
+  const onPointerDownMark = (e) => {
+    if(!panelSVG || e.button===2) return;
+    if(!markEnabled){ // permitir borrar si toca una estrella, pero no crear
+      const isPin = e.target && e.target.classList && e.target.classList.contains('pin');
+      if(isPin){ try{ e.target.remove(); }catch(_){} }
+      return;
+    }
+    e.preventDefault?.();
+    const isPin = e.target && e.target.classList && e.target.classList.contains('pin');
+    if(isPin){ try{ e.target.remove(); }catch(_){} return; }
+    const p = svgPoint(panelSVG, e.clientX, e.clientY);
+    start = p;
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('class','pin');
+    path.setAttribute('d', starPath(p.x, p.y, STAR_MIN));
+    pins.appendChild(path);
+    drawing = path;
+    try{ panelSVG.setPointerCapture?.(e.pointerId); }catch(_){}
+  };
+  const onPointerMoveMark = (e) => {
+    if(!drawing) return; e.preventDefault?.();
+    const p = svgPoint(panelSVG, e.clientX, e.clientY);
+    const dx=p.x-start.x, dy=p.y-start.y; const r=Math.max(STAR_MIN, Math.min(STAR_MAX, Math.hypot(dx,dy)));
+    drawing.setAttribute('d', starPath(start.x, start.y, r));
+  };
+  const endDrawingMark = (e) => { if(!drawing) return; e?.preventDefault?.(); drawing=null; start=null; };
+  let drawing=null, start=null;
 
-  var activePointers=new Map(); var isPanning=false; var lastPan=null; var pinchStart=null; // {d,cx,cy,scale,tx,ty}
-  function onPointerDownNav(e){ if(!panelSVG) return; panelSVG.setPointerCapture && panelSVG.setPointerCapture(e.pointerId); activePointers.set(e.pointerId,{x:e.clientX,y:e.clientY}); if(activePointers.size===1){ isPanning=true; lastPan=svgPoint(panelSVG,e.clientX,e.clientY); panelSVG.classList.add('grabbing'); } else if(activePointers.size===2){ var pts=Array.from(activePointers.values()); var a=pts[0], b=pts[1]; var dx=b.x-a.x, dy=b.y-a.y; var d=Math.hypot(dx,dy); var midx=(a.x+b.x)/2, midy=(a.y+b.y)/2; var sp=svgPoint(panelSVG,midx,midy); pinchStart={d:d,cx:sp.x,cy:sp.y,scale:scale,tx:tx,ty:ty}; } if(e.preventDefault) e.preventDefault(); }
-  function onPointerMoveNav(e){ if(!activePointers.has(e.pointerId)) return; activePointers.set(e.pointerId,{x:e.clientX,y:e.clientY}); if(activePointers.size===1 && isPanning){ var p=svgPoint(panelSVG,e.clientX,e.clientY); tx += (p.x-lastPan.x); ty += (p.y-lastPan.y); lastPan=p; applyView(); if(e.preventDefault) e.preventDefault(); } else if(activePointers.size===2 && pinchStart){ var pts=Array.from(activePointers.values()); var a=pts[0], b=pts[1]; var dx=b.x-a.x, dy=b.y-a.y; var d=Math.hypot(dx,dy); var midx=(a.x+b.x)/2, midy=(a.y+b.y)/2; var sp=svgPoint(panelSVG,midx,midy); var ns=Math.min(MAX_Z,Math.max(MIN_Z,pinchStart.scale*(d/pinchStart.d))); scale=ns; // mantener anclaje razonable
-      tx = sp.x - (ns/pinchStart.scale) * (pinchStart.cx - pinchStart.tx);
-      ty = sp.y - (ns/pinchStart.scale) * (pinchStart.cy - pinchStart.ty);
-      applyView(); if(e.preventDefault) e.preventDefault(); } }
-  function onPointerUpNav(e){ activePointers.delete(e.pointerId); if(activePointers.size<=0){ isPanning=false; lastPan=null; pinchStart=null; panelSVG.classList.remove('grabbing'); } }
-  function resetView(){ scale=1; tx=0; ty=0; applyView(); }
+  // Pan & Zoom (solo para cumplir tests/UX si lo usás)
+  let scale=1, MIN_Z=0.6, MAX_Z=3; let tx=0, ty=0; let isPanning=false, lastPan=null, pinchStart=null; // {d,cx,cy,scale,tx,ty}
+  const applyView = () => { viewport?.setAttribute('transform',`translate(${tx},${ty}) scale(${scale})`); };
+  const onWheel = (e) => { if(mode!=='nav') return; if(!panelSVG) return; e.preventDefault(); const p=svgPoint(panelSVG,e.clientX,e.clientY); const dz=-e.deltaY*0.0012; const ns=Math.min(MAX_Z,Math.max(MIN_Z,scale*(1+dz))); const k=ns/scale; tx=p.x - k*(p.x - tx); ty=p.y - k*(p.y - ty); scale=ns; applyView(); };
+  const onPointerDownNav = (e) => { if(!panelSVG) return; panelSVG.setPointerCapture?.(e.pointerId); activePointers.set(e.pointerId,{x:e.clientX,y:e.clientY}); if(activePointers.size===1){ isPanning=true; lastPan=svgPoint(panelSVG,e.clientX,e.clientY); panelSVG.classList.add('grabbing'); } else if(activePointers.size===2){ const pts=[...activePointers.values()]; const a=pts[0], b=pts[1]; const dx=b.x-a.x, dy=b.y-a.y; const d=Math.hypot(dx,dy); const midx=(a.x+b.x)/2, midy=(a.y+b.y)/2; const sp=svgPoint(panelSVG,midx,midy); pinchStart={d, cx:sp.x, cy:sp.y, scale, tx, ty}; } e.preventDefault?.(); };
+  const onPointerMoveNav = (e) => { if(!activePointers.has(e.pointerId)) return; activePointers.set(e.pointerId,{x:e.clientX,y:e.clientY}); if(activePointers.size===1 && isPanning){ const p=svgPoint(panelSVG,e.clientX,e.clientY); tx += (p.x-lastPan.x); ty += (p.y-lastPan.y); lastPan=p; applyView(); e.preventDefault?.(); } else if(activePointers.size===2 && pinchStart){ const pts=[...activePointers.values()]; const a=pts[0], b=pts[1]; const dx=b.x-a.x, dy=b.y-a.y; const d=Math.hypot(dx,dy); const midx=(a.x+b.x)/2, midy=(a.y+b.y)/2; const sp=svgPoint(panelSVG,midx,midy); const ns=Math.min(MAX_Z,Math.max(MIN_Z,pinchStart.scale*(d/pinchStart.d))); scale=ns; tx = sp.x - (ns/pinchStart.scale) * (pinchStart.cx - pinchStart.tx); ty = sp.y - (ns/pinchStart.scale) * (pinchStart.cy - pinchStart.ty); applyView(); e.preventDefault?.(); } };
+  const onPointerUpNav   = (e) => { activePointers.delete(e.pointerId); if(activePointers.size<=0){ isPanning=false; lastPan=null; pinchStart=null; panelSVG.classList.remove('grabbing'); } };
+  const resetView = () => { scale=1; tx=0; ty=0; applyView(); };
+  const activePointers = new Map();
 
-  /* ===== Estrellas (modo Marcar) ===== */
-  var STAR_MIN=10, STAR_MAX=56; var drawing=null, start=null;
-  function starPath(cx,cy,r,spikes){ if(spikes==null) spikes=5; var inner=r*0.48, rot=Math.PI/2*3, x=cx, y=cy, step=Math.PI/spikes, d='M '+cx+' '+(cy-r); for(var i=0;i<spikes;i++){ x=cx+Math.cos(rot)*r; y=cy+Math.sin(rot)*r; d+=' L '+x+' '+y; rot+=step; x=cx+Math.cos(rot)*inner; y=cy+Math.sin(rot)*inner; d+=' L '+x+' '+y; rot+=step; } return d+' Z'; }
-  function onPointerDownMark(e){ if(!panelSVG || e.button===2) return; if(e.preventDefault) e.preventDefault(); var target=e.target; var targetPin=target && target.classList && target.classList.contains('pin') ? target : null; if(targetPin){ try{ targetPin.remove(); }catch(_){} return; } var p=svgPoint(panelSVG,e.clientX,e.clientY); start=p; var path=document.createElementNS('http://www.w3.org/2000/svg','path'); path.setAttribute('class','pin'); path.setAttribute('d',starPath(p.x,p.y,STAR_MIN)); pins.appendChild(path); drawing=path; try{ panelSVG.setPointerCapture && panelSVG.setPointerCapture(e.pointerId);}catch(_){} }
-  function onPointerMoveMark(e){ if(!drawing) return; if(e.preventDefault) e.preventDefault(); var p=svgPoint(panelSVG,e.clientX,e.clientY); var dx=p.x-start.x, dy=p.y-start.y; var r=Math.max(STAR_MIN,Math.min(STAR_MAX,Math.hypot(dx,dy))); drawing.setAttribute('d',starPath(start.x,start.y,r)); }
-  function endDrawingMark(e){ if(!drawing) return; if(e && e.preventDefault) e.preventDefault(); drawing=null; start=null; }
-
-  // Wire modo radios
-  $$('input[name="modo"]').forEach(function(r){ r.addEventListener('change', function(){ mode = (r.value==='mark') ? 'mark' : 'nav'; }); });
-
-  // Eventos principales según modo
+  // Listeners principales
   if(panelSVG){
     panelSVG.addEventListener('wheel', onWheel, {passive:false});
-    panelSVG.addEventListener('pointerdown', function(e){ if(mode==='nav') onPointerDownNav(e); else onPointerDownMark(e); }, {passive:false});
-    window.addEventListener('pointermove', function(e){ if(mode==='nav') onPointerMoveNav(e); else onPointerMoveMark(e); }, {passive:false});
-    window.addEventListener('pointerup',   function(e){ if(mode==='nav') onPointerUpNav(e); else endDrawingMark(e); }, {passive:false});
-    window.addEventListener('pointercancel', function(e){ if(mode==='nav') onPointerUpNav(e); else endDrawingMark(e); }, {passive:false});
+    panelSVG.addEventListener('pointerdown', (e)=>{ if(mode==='nav') onPointerDownNav(e); else onPointerDownMark(e); }, {passive:false});
+    window.addEventListener('pointermove', (e)=>{ if(mode==='nav') onPointerMoveNav(e); else onPointerMoveMark(e); }, {passive:false});
+    window.addEventListener('pointerup',   (e)=>{ if(mode==='nav') onPointerUpNav(e); else endDrawingMark(e); }, {passive:false});
+    window.addEventListener('pointercancel',(e)=>{ if(mode==='nav') onPointerUpNav(e); else endDrawingMark(e); }, {passive:false});
   }
 
-  // Delegación para tabs
-  var tabsEl = document.getElementById('tabs');
+  // Radio de modo + interruptor de marcado + botones
+  $$('input[name="modo"]').forEach(r=> r.addEventListener('change', ()=>{ mode = (r.value==='mark') ? 'mark' : 'nav'; }));
+  const toggleMark = document.getElementById('toggleMark');
+  if(toggleMark){ toggleMark.addEventListener('change', ()=>{ markEnabled = !!toggleMark.checked; }); }
+  const btnResetView = document.getElementById('btnResetView'); if(btnResetView) btnResetView.addEventListener('click', resetView);
+  const btnClearPins = document.getElementById('btnClearPins'); if(btnClearPins) btnClearPins.addEventListener('click', clearPins);
+
+  // Tabs
+  const tabsEl = document.getElementById('tabs');
   if(tabsEl){
-    tabsEl.addEventListener('click', function(e){
-      var t = e.target.closest ? e.target.closest('.tab') : null;
+    tabsEl.addEventListener('click', (e)=>{
+      const t = e.target.closest?.('.tab');
       if(!t) return;
-      $$('#tabs .tab').forEach(function(o){ o.classList.remove('active'); });
+      $$('#tabs .tab').forEach(o=>o.classList.remove('active'));
       t.classList.add('active');
       musculo = t.getAttribute('data-musculo');
-      clearPins();
-      resetView();
-      loadSVG();
+      clearPins(); resetView(); loadSVG();
     });
   }
 
-  // Cambio de lado
-  var selLado = document.getElementById('selLado');
-  if(selLado){ selLado.addEventListener('change', function(){ lado = selLado.value; clearPins(); resetView(); loadSVG(); }); }
+  // Lado
+  const selLado = document.getElementById('selLado');
+  if(selLado){ selLado.addEventListener('change', ()=>{ lado = selLado.value; clearPins(); resetView(); loadSVG(); }); }
 
-  // Botones auxiliares
-  var btnResetView=document.getElementById('btnResetView'); if(btnResetView) btnResetView.addEventListener('click', resetView);
-  var btnClearPins=document.getElementById('btnClearPins'); if(btnClearPins) btnClearPins.addEventListener('click', clearPins);
-  var btnPDF    = document.getElementById('btnPDF');    if(btnPDF)    btnPDF.addEventListener('click', function(){ window.print(); });
-  var btnLimpiar= document.getElementById('btnLimpiar'); if(btnLimpiar) btnLimpiar.addEventListener('click', function(){ var nombre=$('#inpNombre'); if(nombre) nombre.value=''; var fecha=$('#inpFecha'); if(fecha) fecha.value=''; $$('#optGrado input[type=radio]').forEach(function(r){ r.checked=false; }); $$('#optTejido input[type=checkbox],#optAsociadas input[type=checkbox]').forEach(function(c){ c.checked=false; }); clearPins(); resetView(); });
+  // Botones generales
+  const btnPDF    = document.getElementById('btnPDF');    if(btnPDF)    btnPDF.addEventListener('click', ()=>window.print());
+  const btnLimpiar= document.getElementById('btnLimpiar'); if(btnLimpiar) btnLimpiar.addEventListener('click', ()=>{
+    const nombre=$('#inpNombre'); if(nombre) nombre.value='';
+    const fecha=$('#inpFecha');   if(fecha)  fecha.value='';
+    $$('#optGrado input[type=radio]').forEach(r=>r.checked=false);
+    $$('#optTejido input[type=checkbox],#optAsociadas input[type=checkbox]').forEach(c=>c.checked=false);
+    clearPins(); resetView();
+  });
 
-  // ====== TESTS ======
+  // ===== TESTS =====
   function assert(cond,msg){ if(!cond){ console.error('[TEST FAIL]',msg); return false;} console.log('[TEST OK]',msg); return true; }
-  var tests=[
-    function(){ return assert(!!document.getElementById('tabs'),'Existe barra de tabs'); },
-    function(){ return assert(document.querySelectorAll('#tabs .tab').length===6,'Hay 6 pestañas'); },
-    function(){ return assert(!!document.getElementById('selLado'),'Existe selector de lado'); },
-    function(){ return assert(!!document.getElementById('panelSVG'),'Existe panel SVG'); },
-    function(){ return assert(typeof loadSVG==='function','loadSVG definida'); },
-    function(){ try{ var p=loadSVG(); assert(p instanceof Promise || p===undefined,'loadSVG no arroja'); return true;}catch(e){ return assert(false,'loadSVG no debería arrojar'); } },
-    function(){ return assert(!!document.querySelector('input[name="modo"][value="nav"]') && !!document.querySelector('input[name="modo"][value="mark"]'),'Switch de modo presente'); },
-    function(){ return assert(!!document.getElementById('btnClearPins') && !!document.getElementById('btnResetView'),'Botones auxiliares presentes'); }
+  const tests=[
+    ()=>assert(!!document.getElementById('tabs'),'Existe barra de tabs'),
+    ()=>assert(document.querySelectorAll('#tabs .tab').length===6,'Hay 6 pestañas'),
+    ()=>assert(!!document.getElementById('selLado'),'Existe selector de lado'),
+    ()=>assert(!!document.getElementById('panelSVG'),'Existe panel SVG'),
+    ()=>assert(typeof loadSVG==='function','loadSVG definida'),
+    ()=>{ try{ const p=loadSVG(); return assert(p instanceof Promise || p===undefined,'loadSVG no arroja'); }catch(e){ return assert(false,'loadSVG no debería arrojar'); } },
+    ()=>assert(!!document.querySelector('input[name="modo"][value="nav"]') && !!document.querySelector('input[name="modo"][value="mark"]'),'Switch de modo presente'),
+    ()=>assert(!!document.getElementById('btnClearPins') && !!document.getElementById('btnResetView'),'Botones auxiliares presentes'),
+    ()=>assert(!!document.getElementById('toggleMark'),'Toggle de marcado presente'),
+    ()=>{ // intentar crear con toggle OFF => no debe cambiar conteo
+      const toggle=document.getElementById('toggleMark'); if(toggle){ toggle.checked=false; toggle.dispatchEvent(new Event('change')); }
+      const before=pins.childElementCount; const rect=panelSVG.getBoundingClientRect();
+      try{ const down=new PointerEvent('pointerdown',{clientX:rect.left+60,clientY:rect.top+60,pointerId:11}); panelSVG.dispatchEvent(down);}catch(_){}
+      const after=pins.childElementCount; return assert(after===before,'Con marcado OFF NO se agregan estrellas');
+    }
   ];
-  tests.forEach(function(t){ try{ t(); }catch(e){ console.error('[TEST ERROR]', e); } });
+  tests.forEach(t=>{ try{ t(); }catch(e){ console.error('[TEST ERROR]', e); } });
 
   // Carga inicial
   loadSVG();
