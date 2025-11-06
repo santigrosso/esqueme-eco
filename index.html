@@ -19,7 +19,7 @@
   header h1{margin:0;font-size:1.35rem;letter-spacing:.2px}
 
   /* Panel de datos */
-  .panel-datos{background:var(--panel);color:var(--ink);padding:1rem 1.25rem;border-bottom:1px solid var(--line);display:flex;flex-wrap:nowrap;align-items:end;gap:.8rem;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+  .panel-datos{background:var(--panel);color:var(--ink);padding:1rem 1.25rem;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;align-items:end;gap:.8rem;overflow-x:visible;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
   .panel-datos .fld{min-width:220px}
   .panel-datos .actions{min-width:max-content;display:flex;gap:.5rem;margin-left:auto}
   .fld{display:flex;flex-direction:column;gap:.35rem}
@@ -79,31 +79,33 @@
   <section class="panel-datos">
     <div class="fld"><label>Nombre y Apellido</label><input id="inpNombre" placeholder="Apellido, Nombre"/></div>
     <div class="fld"><label>Fecha de lesión</label><input id="inpFecha" type="date"/></div>
-    <div class="fld"><label>Miembro</label><select id="selLado"><option value="derecho" selected>Derecho</option><option value="izquierdo">Izquierdo</option></select></div>
-    <div class="fld"></div>
-    <div class="actions"><button class="btn ghost" id="btnLimpiar">Limpiar</button><button class="btn primary" id="btnPDF">Generar PDF</button></div>
+    <div class="actions"><button class="btn primary" id="btnPDF">Generar PDF</button></div>
   </section>
 
   <!-- PANEL SVG + TABS -->
   <section class="svg-panel">
     <div class="toolbar">
-      <label id="markSwitch">
-        <input id="toggleMark" type="checkbox" aria-label="Activar marcas">
-        <span class="track" aria-hidden="true"></span>
-        <span class="thumb" aria-hidden="true"></span>
-        <span class="label">Activar marcas (★)</span>
-      </label>
-      <div>
+      <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+        <div id="sideToggle" style="display:inline-flex;border:1px solid #b9c6d9;border-radius:.6rem;overflow:hidden">
+          <button type="button" class="seg seg-left active" data-side="derecho" style="padding:.45rem .75rem;border:0;background:#e8eef7;color:#0e1320;font-weight:700">D</button>
+          <button type="button" class="seg seg-right" data-side="izquierdo" style="padding:.45rem .75rem;border:0;background:#f6f8fb;color:#0e1320;font-weight:700;border-left:1px solid #b9c6d9">I</button>
+        </div>
+        <label id="markSwitch">
+          <input id="toggleMark" type="checkbox" aria-label="Activar marcas">
+          <span class="track" aria-hidden="true"></span>
+          <span class="thumb" aria-hidden="true"></span>
+          <span class="label">Activar marcas (★)</span>
+        </label>
         <button class="btn ghost" id="btnClearPins" title="Eliminar todas las estrellas">Limpiar estrellas</button>
       </div>
     </div>
     <div class="tabs" id="tabs">
-      <button class="tab" data-musculo="biceps">Biceps</button>
-      <button class="tab" data-musculo="semis">Semis</button>
-      <button class="tab active" data-musculo="rac">RAC</button>
+      <button class="tab" data-musculo="biceps">Bíceps femoral</button>
+      <button class="tab" data-musculo="semis">Semitendinoso/Semimembranoso</button>
+      <button class="tab active" data-musculo="rac">Recto anterior del cuádriceps</button>
       <button class="tab" data-musculo="aductores">Aductores</button>
-      <button class="tab" data-musculo="soleo">Sóleo</button>
       <button class="tab" data-musculo="gemelos">Gemelos</button>
+      <button class="tab" data-musculo="soleo">Sóleo</button>
     </div>
     <div class="canvas">
       <svg id="panelSVG" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
@@ -158,85 +160,85 @@
 </div>
 
 <script>
-(() => {
+(function(){
   // ===== Config =====
-  const BASE_SVG_PATH = './svg'; // ./svg/<musculo>/<musculo>-<lado>.svg
-  const $ = (s) => document.querySelector(s);
-  const $$ = (s) => Array.from(document.querySelectorAll(s));
-  let musculo = 'rac';
-  let lado = 'derecho';
+  var BASE_SVG_PATH = './svg'; // ./svg/<musculo>/<musculo>-<lado>.svg
+  var $ = function(s){ return document.querySelector(s); };
+  var $$ = function(s){ return Array.prototype.slice.call(document.querySelectorAll(s)); };
+  var musculo = 'rac';
+  var lado = 'derecho';
 
   // DOM refs
-  const panelSVG = document.getElementById('panelSVG');
-  const artwork  = document.getElementById('artwork');
-  const pins     = document.getElementById('pins');
-  const ph       = document.getElementById('placeholder');
-  const phMus    = document.getElementById('phMus');
-  const phFile   = document.getElementById('phFile');
-  const tMus     = document.getElementById('tMusculo');
-  const tLado    = document.getElementById('tLado');
+  var panelSVG = document.getElementById('panelSVG');
+  var artwork  = document.getElementById('artwork');
+  var pins     = document.getElementById('pins');
+  var ph       = document.getElementById('placeholder');
+  var phMus    = document.getElementById('phMus');
+  var phFile   = document.getElementById('phFile');
+  var tMus     = document.getElementById('tMusculo');
+  var tLado    = document.getElementById('tLado');
 
   // ===== Carga de SVG =====
   function loadSVG(){
     if(!artwork) return Promise.resolve();
-    const path = `${BASE_SVG_PATH}/${musculo}/${musculo}-${lado}.svg`;
+    var path = BASE_SVG_PATH + '/' + musculo + '/' + musculo + '-' + lado + '.svg';
     if(phMus)  phMus.textContent  = musculo;
-    if(phFile) phFile.textContent = `${musculo}-${lado}.svg`;
-    if(tMus){ const tabEl = document.querySelector(`.tab[data-musculo="${musculo}"]`); tMus.textContent = (tabEl ? tabEl.textContent : musculo).trim(); }
+    if(phFile) phFile.textContent = musculo + '-' + lado + '.svg';
+    if(tMus){ var tabEl = document.querySelector('.tab[data-musculo="' + musculo + '"]'); tMus.textContent = (tabEl ? tabEl.textContent : musculo).trim(); }
     if(tLado)  tLado.textContent  = lado;
 
-    return fetch(path,{cache:'no-store'}).then(res => {
+    return fetch(path,{cache:'no-store'}).then(function(res){
       if(!res.ok){ if(ph) ph.style.display='block'; artwork.innerHTML=''; console.warn('[SVG] No encontrado:', path); return null; }
       return res.text();
-    }).then(txt => {
+    }).then(function(txt){
       if(txt===null) return;
-      const doc = new DOMParser().parseFromString(txt,'image/svg+xml');
-      const src = doc.querySelector('svg');
+      var doc = new DOMParser().parseFromString(txt,'image/svg+xml');
+      var src = doc.querySelector('svg');
       if(!src){ if(ph) ph.style.display='block'; artwork.innerHTML=''; console.warn('[SVG] Sin <svg> raíz:', path); return; }
       artwork.innerHTML='';
-      const vb = src.getAttribute('viewBox'); panelSVG.setAttribute('viewBox', vb ? vb : '0 0 1600 900');
-      Array.from(src.childNodes).forEach(n => artwork.appendChild(panelSVG.ownerDocument.importNode(n,true)));
+      var vb = src.getAttribute('viewBox'); panelSVG.setAttribute('viewBox', vb ? vb : '0 0 1600 900');
+      Array.prototype.slice.call(src.childNodes).forEach(function(n){ artwork.appendChild(panelSVG.ownerDocument.importNode(n,true)); });
       if(ph) ph.style.display='none';
-    }).catch(err => { if(ph) ph.style.display='block'; artwork.innerHTML=''; console.warn('[SVG] Error al cargar', path, err?.message||err); });
+    }).catch(function(err){ if(ph) ph.style.display='block'; artwork.innerHTML=''; console.warn('[SVG] Error al cargar', path, (err && err.message) || err); });
   }
 
   // ===== Estrellas =====
   function clearPins(){ if(pins){ while(pins.firstChild) pins.removeChild(pins.firstChild); } }
-  const STAR_MIN = 10, STAR_MAX = 56;
-  const svgPoint = (svg, clientX, clientY) => {
-    const pt = svg.createSVGPoint(); pt.x=clientX; pt.y=clientY; return pt.matrixTransform(svg.getScreenCTM().inverse());
+  var STAR_MIN = 10, STAR_MAX = 56;
+  var svgPoint = function(svg, clientX, clientY){
+    var pt = svg.createSVGPoint(); pt.x=clientX; pt.y=clientY; return pt.matrixTransform(svg.getScreenCTM().inverse());
   };
-  const starPath = (cx,cy,r,spikes=5) => {
-    const inner=r*0.48; let rot=Math.PI/2*3, x=cx, y=cy, step=Math.PI/spikes, d=`M ${cx} ${cy-r}`;
-    for(let i=0;i<spikes;i++){ x=cx+Math.cos(rot)*r; y=cy+Math.sin(rot)*r; d+=` L ${x} ${y}`; rot+=step; x=cx+Math.cos(rot)*inner; y=cy+Math.sin(rot)*inner; d+=` L ${x} ${y}`; rot+=step; }
+  var starPath = function(cx,cy,r,spikes){
+    if(spikes==null) spikes=5;
+    var inner=r*0.48; var rot=Math.PI/2*3, x=cx, y=cy, step=Math.PI/spikes, d='M ' + cx + ' ' + (cy-r);
+    for(var i=0;i<spikes;i++){ x=cx+Math.cos(rot)*r; y=cy+Math.sin(rot)*r; d+=' L ' + x + ' ' + y; rot+=step; x=cx+Math.cos(rot)*inner; y=cy+Math.sin(rot)*inner; d+=' L ' + x + ' ' + y; rot+=step; }
     return d+' Z';
   };
 
-  let markEnabled = false; // controlado por el interruptor
-  let drawing=null, start=null;
+  var markEnabled = false; // controlado por el interruptor
+  var drawing=null, start=null;
 
-  const onPointerDown = (e) => {
+  var onPointerDown = function(e){
     if(!panelSVG || e.button===2) return;
-    const isPin = e.target && e.target.classList && e.target.classList.contains('pin');
-    if(isPin){ try{ e.target.remove(); }catch(_){} return; }
+    var isPin = e.target && e.target.classList && e.target.classList.contains('pin');
+    if(isPin){ try{ e.target.remove(); }catch(_){ } return; }
     if(!markEnabled) return; // no crear con switch OFF
-    e.preventDefault?.();
-    const p = svgPoint(panelSVG, e.clientX, e.clientY);
+    if(e && e.preventDefault) e.preventDefault();
+    var p = svgPoint(panelSVG, e.clientX, e.clientY);
     start = p;
-    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    var path = document.createElementNS('http://www.w3.org/2000/svg','path');
     path.setAttribute('class','pin');
     path.setAttribute('d', starPath(p.x, p.y, STAR_MIN));
     pins.appendChild(path);
     drawing = path;
-    // Importante: NO usar setPointerCapture para evitar NotFoundError en algunos navegadores/sandboxes
   };
-  const onPointerMove = (e) => {
-    if(!drawing) return; e.preventDefault?.();
-    const p = svgPoint(panelSVG, e.clientX, e.clientY);
-    const dx=p.x-start.x, dy=p.y-start.y; const r=Math.max(STAR_MIN, Math.min(STAR_MAX, Math.hypot(dx,dy)));
+  var onPointerMove = function(e){
+    if(!drawing) return; if(e && e.preventDefault) e.preventDefault();
+    var p = svgPoint(panelSVG, e.clientX, e.clientY);
+    var dx=p.x-start.x, dy=p.y-start.y; var r=Math.max(STAR_MIN, Math.min(STAR_MAX, Math.hypot(dx,dy)));
     drawing.setAttribute('d', starPath(start.x, start.y, r));
   };
-  const onPointerEnd = (e) => { if(!drawing) return; e?.preventDefault?.(); drawing=null; start=null; };
+  var onPointerEnd = function(e){ if(!drawing) return; if(e && e.preventDefault) e.preventDefault(); drawing=null; start=null; };
 
   // Listeners principales (solo marcado)
   if(panelSVG){
@@ -247,24 +249,24 @@
   }
 
   // Switch + acciones
-  const toggleMark = document.getElementById('toggleMark');
-  const switchLabel = document.getElementById('markSwitch');
-  if(toggleMark){ toggleMark.addEventListener('change', ()=>{ markEnabled = !!toggleMark.checked; }); }
+  var toggleMark = document.getElementById('toggleMark');
+  var switchLabel = document.getElementById('markSwitch');
+  if(toggleMark){ toggleMark.addEventListener('change', function(){ markEnabled = !!toggleMark.checked; }); }
   if(switchLabel){ // fallback: tocar en cualquier parte del label
-    switchLabel.addEventListener('click', (ev)=>{
+    switchLabel.addEventListener('click', function(ev){
       if(ev.target && ev.target.id==='toggleMark') return; // el input maneja su propio click
       toggleMark.checked = !toggleMark.checked; toggleMark.dispatchEvent(new Event('change', {bubbles:true}));
     });
   }
-  const btnClearPins = document.getElementById('btnClearPins'); if(btnClearPins) btnClearPins.addEventListener('click', clearPins);
+  var btnClearPins = document.getElementById('btnClearPins'); if(btnClearPins) btnClearPins.addEventListener('click', clearPins);
 
   // Tabs
-  const tabsEl = document.getElementById('tabs');
+  var tabsEl = document.getElementById('tabs');
   if(tabsEl){
-    tabsEl.addEventListener('click', (e)=>{
-      const t = e.target.closest?.('.tab');
+    tabsEl.addEventListener('click', function(e){
+      var t = e.target && e.target.closest ? e.target.closest('.tab') : null;
       if(!t) return;
-      $$('#tabs .tab').forEach(o=>o.classList.remove('active'));
+      $$('#tabs .tab').forEach(function(o){ o.classList.remove('active'); });
       t.classList.add('active');
       musculo = t.getAttribute('data-musculo');
       clearPins(); loadSVG();
@@ -272,46 +274,56 @@
   }
 
   // Lado
-  const selLado = document.getElementById('selLado');
-  if(selLado){ selLado.addEventListener('change', ()=>{ lado = selLado.value; clearPins(); loadSVG(); }); }
+  var sideToggle = document.getElementById('sideToggle');
+  if(sideToggle){
+    sideToggle.addEventListener('click', function(ev){
+      var btn = ev.target && ev.target.closest ? ev.target.closest('button[data-side]') : null;
+      if(!btn) return;
+      Array.prototype.slice.call(sideToggle.querySelectorAll('button[data-side]')).forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      lado = btn.getAttribute('data-side');
+      clearPins(); loadSVG();
+    });
+  }
 
   // Botones generales
-  const btnPDF    = document.getElementById('btnPDF');    if(btnPDF)    btnPDF.addEventListener('click', ()=>window.print());
-  const btnLimpiar= document.getElementById('btnLimpiar'); if(btnLimpiar) btnLimpiar.addEventListener('click', ()=>{
-    const nombre=$('#inpNombre'); if(nombre) nombre.value='';
-    const fecha=$('#inpFecha');   if(fecha)  fecha.value='';
-    $$('#optGrado input[type=radio]').forEach(r=>r.checked=false);
-    $$('#optTejido input[type=checkbox],#optAsociadas input[type=checkbox]').forEach(c=>c.checked=false);
+  var btnPDF    = document.getElementById('btnPDF');    if(btnPDF)    btnPDF.addEventListener('click', function(){ window.print(); });
+  var btnLimpiar= document.getElementById('btnLimpiar'); if(btnLimpiar) btnLimpiar.addEventListener('click', function(){
+    var nombre=$('#inpNombre'); if(nombre) nombre.value='';
+    var fecha=$('#inpFecha');   if(fecha)  fecha.value='';
+    $$('#optGrado input[type=radio]').forEach(function(r){ r.checked=false; });
+    $$('#optTejido input[type=checkbox],#optAsociadas input[type=checkbox]').forEach(function(c){ c.checked=false; });
     clearPins();
   });
 
   // ===== TESTS =====
   function assert(cond,msg){ if(!cond){ console.error('[TEST FAIL]',msg); return false;} console.log('[TEST OK]',msg); return true; }
-  const tests=[
-    ()=>assert(!!document.getElementById('tabs'),'Existe barra de tabs'),
-    ()=>assert(document.querySelectorAll('#tabs .tab').length===6,'Hay 6 pestañas'),
-    ()=>assert(!!document.getElementById('selLado'),'Existe selector de lado'),
-    ()=>assert(!!document.getElementById('panelSVG'),'Existe panel SVG'),
-    ()=>assert(typeof loadSVG==='function','loadSVG definida'),
-    ()=>{ try{ const p=loadSVG(); return assert(p instanceof Promise || p===undefined,'loadSVG no arroja'); }catch(e){ return assert(false,'loadSVG no debería arrojar'); } },
-    ()=>assert(!!document.getElementById('btnClearPins'),'Botón Limpiar estrellas presente'),
-    ()=>assert(!!document.getElementById('toggleMark'),'Toggle de marcado presente'),
-    ()=>{ // OFF: no crea
-      const t=document.getElementById('toggleMark'); t.checked=false; t.dispatchEvent(new Event('change'));
-      const before=pins.childElementCount; const rect=panelSVG.getBoundingClientRect();
-      try{ const down=new PointerEvent('pointerdown',{clientX:rect.left+60,clientY:rect.top+60,pointerId:12}); panelSVG.dispatchEvent(down);}catch(_){/* ignore */}
-      const after=pins.childElementCount; return assert(after===before,'Con marcado OFF NO se agregan estrellas');
+  var tests=[
+    function(){ return assert(!!document.getElementById('tabs'),'Existe barra de tabs'); },
+    function(){ return assert(document.querySelectorAll('#tabs .tab').length===6,'Hay 6 pestañas'); },
+    function(){ return assert(!!document.getElementById('sideToggle'),'Existe selector de lado (I/D)'); },
+    function(){ return assert(document.querySelectorAll('#sideToggle button[data-side]').length===2,'Selector I/D tiene 2 opciones'); },
+    function(){ return assert(!!document.getElementById('panelSVG'),'Existe panel SVG'); },
+    function(){ return assert(typeof loadSVG==='function','loadSVG definida'); },
+    function(){ try{ var p=loadSVG(); return assert(p instanceof Promise || p===undefined,'loadSVG no arroja'); }catch(e){ return assert(false,'loadSVG no debería arrojar'); } },
+    function(){ return assert(!!document.getElementById('btnClearPins'),'Botón Limpiar estrellas presente'); },
+    function(){ return assert(!!document.getElementById('toggleMark'),'Toggle de marcado presente'); },
+    function(){ // OFF: no crea
+      var t=document.getElementById('toggleMark'); t.checked=false; t.dispatchEvent(new Event('change'));
+      var before=pins.childElementCount; var rect=panelSVG.getBoundingClientRect();
+      try{ var down=new PointerEvent('pointerdown',{clientX:rect.left+60,clientY:rect.top+60,pointerId:12}); panelSVG.dispatchEvent(down);}catch(_){ }
+      var after=pins.childElementCount; return assert(after===before,'Con marcado OFF NO se agregan estrellas');
     },
-    ()=>{ // ON: crea
-      const t=document.getElementById('toggleMark'); t.checked=true; t.dispatchEvent(new Event('change'));
-      const before=pins.childElementCount; const rect=panelSVG.getBoundingClientRect();
-      try{ const down=new PointerEvent('pointerdown',{clientX:rect.left+80,clientY:rect.top+80,pointerId:13}); panelSVG.dispatchEvent(down);}catch(_){/* ignore */}
-      const after=pins.childElementCount; return assert(after===before+1,'Con marcado ON sí se agrega estrella');
+    function(){ // ON: crea
+      var t=document.getElementById('toggleMark'); t.checked=true; t.dispatchEvent(new Event('change'));
+      var before=pins.childElementCount; var rect=panelSVG.getBoundingClientRect();
+      try{ var down=new PointerEvent('pointerdown',{clientX:rect.left+80,clientY:rect.top+80,pointerId:13}); panelSVG.dispatchEvent(down);}catch(_){ }
+      var after=pins.childElementCount; return assert(after===before+1,'Con marcado ON sí se agrega estrella');
     },
-    ()=>{ // Limpiar
-      const before=pins.childElementCount; const btn=document.getElementById('btnClearPins'); btn && btn.click(); const after=pins.childElementCount; return assert(after===0,'Limpiar estrellas vacía el grupo'); }
+    function(){ // Limpiar
+      var before=pins.childElementCount; var btn=document.getElementById('btnClearPins'); if(btn) btn.click(); var after=pins.childElementCount; return assert(after===0,'Limpiar estrellas vacía el grupo'); }
   ];
-  tests.forEach(t=>{ try{ t(); }catch(e){ console.error('[TEST ERROR]', e); } });
+  tests.forEach(function(t){ try{ t(); }catch(e){ console.error('[TEST ERROR]', e); } });
 
   // Carga inicial
   loadSVG();
