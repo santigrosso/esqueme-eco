@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Esquema de lesión muscular — v2.4 (texto editable + selector triple)</title>
+<title>Esquema de lesión muscular — v2.5 (ajustes UI + tests limpios)</title>
 <style>
   :root{
     --bg:#0f1115; --ink:#0e1320; --muted:#6b7890; --accent:#5B7EAE; --accent-weak:#8fa7c7;
@@ -71,11 +71,14 @@
   .segbox{display:inline-flex;border:1px solid #b9c6d9;border-radius:.6rem;overflow:hidden}
   .segbox button{padding:.35rem .65rem;border:0;background:#f6f8fb;color:#0e1320;font-weight:700}
   .segbox button.active{background:#e8eef7}
-  .cards{display:grid;grid-template-columns:repeat(3,minmax(260px,1fr));gap:1rem;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
-  .card{border:1px solid var(--line);border-radius:.9rem;background:#fff;padding:.9rem;text-transform:uppercase;text-align:center}
-  .card h3{margin:.1rem 0 .6rem 0;font-size:.95rem;color:#1b2435}
+  .cards{display:grid;grid-template-columns:repeat(3,minmax(300px,1fr));gap:1rem;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+  .card{border:1px solid var(--line);border-radius:.9rem;background:#fff;padding:.9rem;text-align:left}
+  .card h3{text-transform:uppercase;margin:.1rem 0 .6rem 0;font-size:.95rem;color:#1b2435;text-align:center}
   .opt{display:grid;gap:.6rem}
-  .opt label{display:flex;align-items:center;gap:.5rem;justify-content:center}
+  .opt label{display:flex;align-items:center;gap:.5rem;justify-content:flex-start;text-align:left;padding-left:.25rem;white-space:normal}
+  .opt input{margin-right:.25rem}
+  /* Cuando las opciones son Munich, forzamos un renglón y ajustamos tamaño */
+  .opt.munich label{white-space:nowrap;font-size:.9rem}
 
   footer{padding:.8rem 1.25rem;color:#97a6bf;font-size:.9rem;border-top:1px solid rgba(255,255,255,.1)}
 
@@ -166,7 +169,7 @@
         <button class="tool" data-tool="redo" title="Rehacer" aria-label="Rehacer">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M15 14l5-5-5-5"/>
-            <path d="M4 20a8 8 0 0 1 8-8h8"/>
+            <path d="M4 20a 8 8 0 0 1 8-8h8"/>
           </svg>
         </button>
       </div>
@@ -249,7 +252,7 @@
   function cmdUndo(){ var op=undoStack.pop(); if(!op) return; if(op.type==='add'){ var p=op.parent; var e=op.el; if(e && e.parentNode){ var ns=e.nextSibling; p.removeChild(e); redoStack.push({type:'remove', el:e, parent:p, nextSibling:ns}); } } else if(op.type==='remove'){ if(op.parent){ op.parent.insertBefore(op.el, op.nextSibling||null); redoStack.push({type:'add', el:op.el, parent:op.parent, nextSibling:op.nextSibling}); } } }
   function cmdRedo(){ var op=redoStack.pop(); if(!op) return; if(op.type==='add'){ if(op.parent){ op.parent.insertBefore(op.el, op.nextSibling||null); undoStack.push({type:'add', el:op.el, parent:op.parent, nextSibling:op.nextSibling}); } } else if(op.type==='remove'){ var e=op.el; var p=e && e.parentNode; if(p){ var ns=e.nextSibling; p.removeChild(e); undoStack.push({type:'remove', el:e, parent:p, nextSibling:ns}); } } }
 
-  function darken(hex, amt){ var h = hex.replace('#',''); if(h.length===3){ h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2]; } var r=parseInt(h.substr(0,2),16), g=parseInt(h.substr(2,2),16), b=parseInt(h.substr(4,2),16); r=Math.max(0, Math.min(255, r - Math.round(255*amt))); g=Math.max(0, Math.min(255, g - Math.round(255*amt))); b=Math.max(0, Math.min(255, b - Math.round(255*amt))); var toHex=function(n){ var s=n.toString(16); return s.length===1?'0'+s:s; }; return '#'+toHex(r)+toHex(b)+toHex(g); }
+  function darken(hex, amt){ var h = hex.replace('#',''); if(h.length===3){ h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2]; } var r=parseInt(h.substr(0,2),16), g=parseInt(h.substr(2,2),16), b=parseInt(h.substr(4,2),16); r=Math.max(0, Math.min(255, r - Math.round(255*amt))); g=Math.max(0, Math.min(255, g - Math.round(255*amt))); b=Math.max(0, Math.min(255, b - Math.round(255*amt))); var toHex=function(n){ var s=n.toString(16); return s.length===1?'0'+s:s; }; return '#'+toHex(r)+toHex(g)+toHex(b); }
   function applyColorChip(){ var chip=$('#colorChip'); if(chip){ chip.style.background = currentColor; chip.style.borderColor = darken(currentColor, .35); } }
 
   var panelSVG = document.getElementById('panelSVG');
@@ -269,7 +272,7 @@
   function clearPins(){ if(pins){ while(pins.firstChild) pins.removeChild(pins.firstChild); } }
   function clearFree(){ var arr=document.querySelectorAll('#free path'); for(var i=0;i<arr.length;i++){ var p=arr[i]; p.parentNode.removeChild(p);} }
   function clearLines(){ var arr=document.querySelectorAll('#lines line'); for(var i=0;i<arr.length;i++){ var p=arr[i]; p.parentNode.removeChild(p);} }
-  function clearLabels(){ if(labelsGrp){ while(labelsGrp.firstChild) labelsGrp.removeChild(labelsGrp.firstChild);} }
+  function clearLabels(){ if(labelsGrp){ while(labelsGrp.firstChild) labelsGrp.removeChild(labelsGrp.firstChild);} var editors=document.querySelectorAll('.text-editor'); for(var i=0;i<editors.length;i++){ editors[i].parentNode.removeChild(editors[i]); } }
 
   var STAR_MIN = 10, STAR_MAX = 56; var SHAPE_MIN = 18, SHAPE_MAX = 80;
   var svgPoint = function(svg, clientX, clientY){ var pt=svg.createSVGPoint(); pt.x=clientX; pt.y=clientY; return pt.matrixTransform(svg.getScreenCTM().inverse()); };
@@ -302,7 +305,7 @@
   function beginDragLabel(target, e){ var p=svgPoint(panelSVG, e.clientX, e.clientY); draggingLabel=target; var x=parseFloat(target.getAttribute('x')||'0'); var y=parseFloat(target.getAttribute('y')||'0'); dragOff.x = x - p.x; dragOff.y = y - p.y; }
   function moveDragLabel(e){ if(!draggingLabel) return; var p=svgPoint(panelSVG, e.clientX, e.clientY); draggingLabel.setAttribute('x', p.x + dragOff.x); draggingLabel.setAttribute('y', p.y + dragOff.y); }
   function endDragLabel(){ draggingLabel=null; }
-  function editLabelInPlace(target){ var bb = target.getBoundingClientRect(); var input = document.createElement('input'); input.className='text-editor'; input.value = target.textContent; input.style.left = (window.scrollX + bb.left)+'px'; input.style.top  = (window.scrollY + bb.top - 8)+'px'; input.style.minWidth = Math.max(40, bb.width)+'px'; document.body.appendChild(input); input.focus(); input.select(); var commit=function(){ var v=input.value.trim(); if(v){ target.textContent=v; } document.body.removeChild(input); }; var cancel=function(){ document.body.removeChild(input); };
+  function editLabelInPlace(target){ var bb = target.getBoundingClientRect(); var input = document.createElement('input'); input.className='text-editor'; input.value = target.textContent; input.style.left = (window.scrollX + bb.left)+'px'; input.style.top  = (window.scrollY + bb.top - 8)+'px'; input.style.minWidth = Math.max(40, bb.width)+'px'; document.body.appendChild(input); input.focus(); input.select(); var commit=function(){ var v=input.value.trim(); if(v){ target.textContent=v; } if(input.parentNode){ input.parentNode.removeChild(input);} }; var cancel=function(){ if(input.parentNode){ input.parentNode.removeChild(input);} };
     input.addEventListener('keydown', function(ev){ if(ev.key==='Enter'){ commit(); } else if(ev.key==='Escape'){ cancel(); } }); input.addEventListener('blur', commit);
   }
 
@@ -337,12 +340,13 @@
 
   // Grado: BAMIC / MUNICH / CLÁSICA
   var gradoMode = document.getElementById('gradoMode'); var gradoOptions = document.getElementById('gradoOptions'); var cardTejido = document.getElementById('cardTejido');
-  function renderGrado(mode){ if(!gradoOptions) return; var html=''; if(mode==='munich'){
+  function renderGrado(mode){ if(!gradoOptions) return; var html=''; gradoOptions.classList.remove('munich');
+    if(mode==='munich'){
       html += '\n<label><input type="radio" name="grado" value="Lesión parcial menor (3A)"> Lesión parcial menor (3A)</label>';
       html += '\n<label><input type="radio" name="grado" value="Lesión parcial moderada (3B)"> Lesión parcial moderada (3B)</label>';
       html += '\n<label><input type="radio" name="grado" value="Lesión muscular subtotal o total (4)"> Lesión muscular subtotal o total (4)</label>';
       html += '\n<label><input type="radio" name="grado" value="Lesión total del tendón / Avulsión (4)"> Lesión total del tendón / Avulsión (4)</label>';
-      gradoOptions.innerHTML=html; cardTejido.style.display='none';
+      gradoOptions.innerHTML=html; cardTejido.style.display='none'; gradoOptions.classList.add('munich');
     } else if(mode==='clasica'){
       html += '\n<label><input type="radio" name="grado" value="Grado I"> Grado I</label>';
       html += '\n<label><input type="radio" name="grado" value="Grado II"> Grado II</label>';
@@ -368,18 +372,17 @@
     function(){ try{ var p=loadSVG(); return assert(p instanceof Promise || p===undefined,'loadSVG no arroja'); }catch(e){ return assert(false,'loadSVG no debería arrojar'); } },
     function(){ return assert(!!document.getElementById('btnTools'),'Botón Herramientas presente'); },
     function(){ // selector triple
-      renderGrado('bamic'); var n1=$$('#gradoOptions label').length; renderGrado('munich'); var n2=$$('#gradoOptions label').length; var ctVis=(document.getElementById('cardTejido').style.display!=='none'); renderGrado('clasica'); var n3=$$('#gradoOptions label').length; return assert(n1===4 && n2===4 && n3===3 && ctVis===false,'Selector BAMIC/MUNICH/CLÁSICA funciona'); },
-    function(){ // texto creado y editable
-      var rect=panelSVG.getBoundingClientRect(); setTool('text'); var orig=window.prompt; try{ window.prompt=function(){ return 'TEST'; }; panelSVG.dispatchEvent(new PointerEvent('pointerdown',{clientX:rect.left+600,clientY:rect.top+260})); }catch(_){ } finally{ window.prompt=orig; }
-      var last=$('#labels text:last-of-type'); var ok1 = !!last && last.textContent==='TEST';
-      if(!ok1) return assert(false,'Texto no creado');
-      // simular edición in-place
-      try{ var evt=new MouseEvent('dblclick',{bubbles:true}); last.dispatchEvent(evt); }catch(_){ }
-      return assert(!!last,'Texto editable (editor mostrado)'); },
+      renderGrado('bamic'); var n1=$$('#gradoOptions label').length; renderGrado('munich'); var n2=$$('#gradoOptions label').length; var ctOc=(document.getElementById('cardTejido').style.display==='none'); renderGrado('clasica'); var n3=$$('#gradoOptions label').length; return assert(n1===4 && n2===4 && n3===3 && ctOc===true,'Selector BAMIC/MUNICH/CLÁSICA funciona'); },
+    function(){ // texto creado y editor se cierra y limpia
+      var rect=panelSVG.getBoundingClientRect(); var prev=labelsGrp.childElementCount; var orig=window.prompt; try{ setTool('text'); window.prompt=function(){ return 'TEST'; }; panelSVG.dispatchEvent(new PointerEvent('pointerdown',{clientX:rect.left+600,clientY:rect.top+260})); }catch(_){ } finally{ window.prompt=orig; }
+      var last=$('#labels text:last-of-type'); var ok1 = !!last && last.textContent==='TEST'; if(!ok1) return assert(false,'Texto no creado');
+      try{ var evt=new MouseEvent('dblclick',{bubbles:true}); last.dispatchEvent(evt); var editor=document.querySelector('.text-editor'); if(editor){ editor.blur(); if(editor.parentNode){ editor.parentNode.removeChild(editor);} } }catch(_){ }
+      // limpiar el texto de prueba
+      clearLabels(); var now=labelsGrp.childElementCount; return assert(now===0,'Texto de prueba limpiado'); },
   ];
   tests.forEach(function(t){ try{ t(); }catch(e){ console.error('[TEST ERROR]', e); } });
 
-  try{ clearPins(); clearFree(); clearLines(); }catch(_){ }
+  try{ clearPins(); clearFree(); clearLines(); clearLabels(); }catch(_){ }
 
   loadSVG(); applyColorChip(); setTool(null); renderGrado('bamic');
 })();
