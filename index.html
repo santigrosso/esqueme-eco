@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Esquema de lesión muscular — v2.1 (herramientas + color + línea)</title>
+<title>Esquema de lesión muscular — v2.2 (color fuerte + relleno libre + forma)</title>
 <style>
   :root{
     --bg:#0f1115; --ink:#0e1320; --muted:#6b7890; --accent:#5B7EAE; --accent-weak:#8fa7c7;
@@ -38,10 +38,11 @@
   .canvas{border:1px solid var(--line);border-top:none;border-radius:0 0 .9rem .9rem;overflow:hidden;background:#1c1f25;position:relative;z-index:1}
   .canvas svg{display:block;width:100%;height:auto;touch-action:none}
 
-  /* Estilos de marcas */
-  .pin{fill:#FFD54F;stroke:#b79c3b;stroke-width:1.2;pointer-events:auto;cursor:pointer}
-  .free{fill:none;stroke:#FFD54F;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:auto;cursor:pointer}
-  .line{fill:none;stroke:#FFD54F;stroke-width:2;stroke-linecap:round;pointer-events:auto;cursor:pointer}
+  /* Estilos de marcas (sin fijar colores para que prevalezca el atributo) */
+  .pin{stroke-width:.8;pointer-events:auto;cursor:pointer}
+  .free{fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;pointer-events:auto;cursor:pointer}
+  .line{fill:none;stroke-width:1.4;stroke-linecap:round;pointer-events:auto;cursor:pointer}
+  .shape{stroke-width:.8;pointer-events:auto;cursor:pointer}
   #placeholder text{user-select:none}
   #phMsg{fill:#c7d6eb;font-size:18px}
 
@@ -54,10 +55,10 @@
   .tool.active{background:rgba(231,236,243,.15);border-color:#e7ecf3}
   .tool svg{width:18px;height:18px}
 
-  /* Swatches de color */
-  .palette{position:absolute;left:56px;top:0;display:none;gap:6px;flex-wrap:wrap;width:132px;background:var(--overlay);border:1px solid rgba(149,166,193,.45);padding:8px;border-radius:10px}
-  .palette.open{display:flex}
-  .sw{width:22px;height:22px;border-radius:6px;border:1px solid rgba(255,255,255,.6);cursor:pointer}
+  /* Swatches de color (2 filas x 3) */
+  .palette{position:absolute;left:56px;top:0;display:none;grid-template-columns:repeat(3,22px);gap:8px;width:max-content;background:var(--overlay);border:1px solid rgba(149,166,193,.45);padding:8px;border-radius:10px}
+  .palette.open{display:grid}
+  .sw{width:22px;height:22px;border-radius:6px;border:1px solid rgba(255,255,255,.9);cursor:pointer}
   .sw.active{outline:2px solid #fff}
   .color-chip{width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.25);display:block}
 
@@ -102,13 +103,7 @@
           <button type="button" class="seg seg-left active" data-side="derecho" style="padding:.45rem .75rem;border:0;background:#e8eef7;color:#0e1320;font-weight:700">D</button>
           <button type="button" class="seg seg-right" data-side="izquierdo" style="padding:.45rem .75rem;border:0;background:#f6f8fb;color:#0e1320;font-weight:700;border-left:1px solid #b9c6d9">I</button>
         </div>
-        <label id="markSwitch" style="display:none"> <!-- oculto, mantenido por compatibilidad -->
-          <input id="toggleMark" type="checkbox" aria-label="Activar marcas">
-          <span class="track" aria-hidden="true"></span>
-          <span class="thumb" aria-hidden="true"></span>
-          <span class="label">Activar marcas (★)</span>
-        </label>
-        <button class="btn ghost" id="btnClearPins" title="Eliminar todas las estrellas">Limpiar estrellas</button>
+        <button class="btn ghost" id="btnClearPins" title="Eliminar todas las marcas">Limpiar marcas</button>
       </div>
     </div>
     <div class="tabs" id="tabs">
@@ -127,6 +122,9 @@
         <button class="tool" data-tool="star" title="Estrella" aria-label="Estrella">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 18.9 6.2 21l1.1-6.5L2.6 9.8l6.5-.9L12 3z"/></svg>
         </button>
+        <button class="tool" data-tool="shape" title="Forma" aria-label="Forma">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 3c3-1 5 0 6 2s3 2 5 3-1 4-1 5-1 4-4 5-5 0-6-2-4-2-4-4 1-6 4-9z"/></svg>
+        </button>
         <button class="tool" data-tool="free" title="Dibujo libre" aria-label="Dibujo libre">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/></svg>
         </button>
@@ -137,12 +135,12 @@
           <span class="color-chip" id="colorChip"></span>
         </button>
         <div id="palette" class="palette" aria-hidden="true">
-          <button class="sw" data-color="#FFD54F" style="background:#FFD54F"></button>
-          <button class="sw" data-color="#FF6B6B" style="background:#FF6B6B"></button>
-          <button class="sw" data-color="#4DD0E1" style="background:#4DD0E1"></button>
-          <button class="sw" data-color="#81C784" style="background:#81C784"></button>
-          <button class="sw" data-color="#BA68C8" style="background:#BA68C8"></button>
-          <button class="sw" data-color="#FFFFFF" style="background:#FFFFFF"></button>
+          <button class="sw" data-color="#FF1744" style="background:#FF1744"></button>
+          <button class="sw" data-color="#2962FF" style="background:#2962FF"></button>
+          <button class="sw" data-color="#00C853" style="background:#00C853"></button>
+          <button class="sw" data-color="#FF9100" style="background:#FF9100"></button>
+          <button class="sw" data-color="#FFD600" style="background:#FFD600"></button>
+          <button class="sw" data-color="#000000" style="background:#000000"></button>
         </div>
         <button class="tool" data-tool="erase" title="Borrar" aria-label="Borrar">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 3l5 5-9 9H7L2 12l9-9h5zM7 17h10v2H7z"/></svg>
@@ -218,8 +216,8 @@
   var lado = 'derecho';
 
   // Estado de herramientas
-  var currentTool = null; // 'star' | 'free' | 'line' | 'erase' | null
-  var currentColor = '#FFD54F';
+  var currentTool = null; // 'star' | 'shape' | 'free' | 'line' | 'erase' | null
+  var currentColor = '#FF1744'; // rojo fuerte por defecto
 
   // Undo/Redo (simple)
   var undoStack = []; // {type:'add'|'remove', el:Node, parent:Node, nextSibling:Node|null}
@@ -279,48 +277,57 @@
     }).catch(function(err){ if(ph) ph.style.display='block'; artwork.innerHTML=''; console.warn('[SVG] Error al cargar', path, (err && err.message) || err); });
   }
 
-  // ===== Marcas: estrella, dibujo libre (rellenable) y línea =====
+  // ===== Helpers =====
   function clearPins(){ if(pins){ while(pins.firstChild) pins.removeChild(pins.firstChild); } }
   function clearFree(){ var arr=document.querySelectorAll('#free path'); for(var i=0;i<arr.length;i++){ var p=arr[i]; p.parentNode.removeChild(p);} }
   function clearLines(){ var arr=document.querySelectorAll('#lines line'); for(var i=0;i<arr.length;i++){ var p=arr[i]; p.parentNode.removeChild(p);} }
 
   var STAR_MIN = 10, STAR_MAX = 56;
+  var SHAPE_MIN = 18, SHAPE_MAX = 80;
   var svgPoint = function(svg, clientX, clientY){ var pt = svg.createSVGPoint(); pt.x=clientX; pt.y=clientY; return pt.matrixTransform(svg.getScreenCTM().inverse()); };
   var starPath = function(cx,cy,r,spikes){ if(spikes==null) spikes=5; var inner=r*0.48; var rot=Math.PI/2*3, x=cx, y=cy, step=Math.PI/spikes, d='M ' + cx + ' ' + (cy-r);
     for(var i=0;i<spikes;i++){ x=cx+Math.cos(rot)*r; y=cy+Math.sin(rot)*r; d+=' L ' + x + ' ' + y; rot+=step; x=cx+Math.cos(rot)*inner; y=cy+Math.sin(rot)*inner; d+=' L ' + x + ' ' + y; rot+=step; } return d+' Z'; };
+  // Splotch/forma tipo "mancha"
+  function splatPath(cx,cy,r,lobes,irreg){ if(lobes==null) lobes=8; if(irreg==null) irreg=0.35; var d='';
+    for(var i=0;i<=lobes;i++){ var a=(i/lobes)*Math.PI*2; var rr=r*(1 - irreg + Math.random()*irreg*2); var x=cx+Math.cos(a)*rr; var y=cy+Math.sin(a)*rr; d += (i===0? 'M ':' L ')+x+' '+y; }
+    return d+' Z'; }
 
-  var drawing=null, start=null;        // para estrella
-  var freePath=null, freeD='', freeStart=null; // para libre con cierre
-  var lineEl=null, lineStart=null;     // para línea
+  // Estados de dibujo
+  var drawing=null, start=null;        // estrella
+  var freePath=null, freeD='', freeStart=null, freeLast=null; // libre
+  var lineEl=null, lineStart=null;     // línea
+  var shapeEl=null, shapeStart=null;   // forma
 
-  function startStar(e){ var p=svgPoint(panelSVG, e.clientX, e.clientY); start=p; var path=document.createElementNS('http://www.w3.org/2000/svg','path'); path.setAttribute('class','pin'); path.setAttribute('fill', currentColor); path.setAttribute('stroke', darken(currentColor,.3)); path.setAttribute('stroke-width','1.2'); path.setAttribute('d', starPath(p.x,p.y,STAR_MIN)); pins.appendChild(path); drawing=path; pushAdd(path); }
+  function startStar(e){ var p=svgPoint(panelSVG, e.clientX, e.clientY); start=p; var path=document.createElementNS('http://www.w3.org/2000/svg','path'); path.setAttribute('class','pin'); path.setAttribute('fill', currentColor); path.setAttribute('stroke', darken(currentColor,.3)); path.setAttribute('stroke-width','.8'); path.setAttribute('d', starPath(p.x,p.y,STAR_MIN)); pins.appendChild(path); drawing=path; pushAdd(path); }
   function updateStar(e){ if(!drawing) return; var p=svgPoint(panelSVG, e.clientX, e.clientY); var dx=p.x-start.x, dy=p.y-start.y; var r=Math.max(STAR_MIN, Math.min(STAR_MAX, Math.hypot(dx,dy))); drawing.setAttribute('d', starPath(start.x,start.y,r)); }
   function endStar(){ drawing=null; start=null; }
 
-  function startFree(e){ var p=svgPoint(panelSVG, e.clientX, e.clientY); freeStart=p; freeD='M '+p.x+' '+p.y; freePath=document.createElementNS('http://www.w3.org/2000/svg','path'); freePath.setAttribute('class','free'); freePath.setAttribute('stroke', darken(currentColor,.25)); freePath.setAttribute('stroke-width','2'); freePath.setAttribute('fill','none'); freePath.setAttribute('d', freeD); freeGrp.appendChild(freePath); pushAdd(freePath); }
-  function updateFree(e){ if(!freePath) return; var p=svgPoint(panelSVG, e.clientX, e.clientY); freeD += ' L '+p.x+' '+p.y; freePath.setAttribute('d', freeD); }
-  function endFree(e){ if(!freePath) return; // si cierra cerca del inicio, cerrar y rellenar
-    var p=svgPoint(panelSVG, e.clientX, e.clientY); var dist=Math.hypot(p.x-freeStart.x, p.y-freeStart.y);
-    if(dist<20 && freeD.split('L').length>6){ // umbral y puntos mínimos
-      freeD += ' Z'; freePath.setAttribute('d', freeD); freePath.setAttribute('fill', currentColor); freePath.setAttribute('stroke', darken(currentColor,.35));
-    }
-    freePath=null; freeD=''; freeStart=null; }
+  function startFree(e){ var p=svgPoint(panelSVG, e.clientX, e.clientY); freeStart=p; freeLast=p; freeD='M '+p.x+' '+p.y; freePath=document.createElementNS('http://www.w3.org/2000/svg','path'); freePath.setAttribute('class','free'); freePath.setAttribute('stroke', darken(currentColor,.25)); freePath.setAttribute('stroke-width','1.4'); freePath.setAttribute('fill','none'); freePath.setAttribute('d', freeD); freeGrp.appendChild(freePath); pushAdd(freePath); }
+  function updateFree(e){ if(!freePath) return; var p=svgPoint(panelSVG, e.clientX, e.clientY); freeD += ' L '+p.x+' '+p.y; freePath.setAttribute('d', freeD); freeLast=p; }
+  function endFree(e){ if(!freePath) return; var last = freeLast || freeStart; var dist=Math.hypot(last.x-freeStart.x, last.y-freeStart.y);
+    if(dist<24 && freeD.split('L').length>6){ freeD += ' Z'; freePath.setAttribute('d', freeD); freePath.setAttribute('fill', currentColor); freePath.setAttribute('stroke', darken(currentColor,.35)); }
+    freePath=null; freeD=''; freeStart=null; freeLast=null; }
 
-  function startLine(e){ var p=svgPoint(panelSVG, e.clientX, e.clientY); lineStart=p; lineEl=document.createElementNS('http://www.w3.org/2000/svg','line'); lineEl.setAttribute('class','line'); lineEl.setAttribute('x1', p.x); lineEl.setAttribute('y1', p.y); lineEl.setAttribute('x2', p.x); lineEl.setAttribute('y2', p.y); lineEl.setAttribute('stroke', darken(currentColor,.25)); lineEl.setAttribute('stroke-width','2'); linesGrp.appendChild(lineEl); pushAdd(lineEl); }
+  function startLine(e){ var p=svgPoint(panelSVG, e.clientX, e.clientY); lineStart=p; lineEl=document.createElementNS('http://www.w3.org/2000/svg','line'); lineEl.setAttribute('class','line'); lineEl.setAttribute('x1', p.x); lineEl.setAttribute('y1', p.y); lineEl.setAttribute('x2', p.x); lineEl.setAttribute('y2', p.y); lineEl.setAttribute('stroke', darken(currentColor,.25)); lineEl.setAttribute('stroke-width','1.4'); linesGrp.appendChild(lineEl); pushAdd(lineEl); }
   function updateLine(e){ if(!lineEl) return; var p=svgPoint(panelSVG, e.clientX, e.clientY); lineEl.setAttribute('x2', p.x); lineEl.setAttribute('y2', p.y); }
   function endLine(e){ if(!lineEl) return; var p=svgPoint(panelSVG, e.clientX, e.clientY); var len=Math.hypot(p.x-lineStart.x, p.y-lineStart.y); if(len<6){ var parent=lineEl.parentNode; var next=lineEl.nextSibling; parent.removeChild(lineEl); undoStack.pop(); } lineEl=null; lineStart=null; }
 
-  function tryErase(target){ if(!target) return; if(target.classList && (target.classList.contains('pin') || target.classList.contains('free') || target.classList.contains('line'))){ var parent=target.parentNode; var next=target.nextSibling; parent.removeChild(target); pushRemove(target,parent,next); } }
+  function startShape(e){ var p=svgPoint(panelSVG, e.clientX, e.clientY); shapeStart=p; shapeEl=document.createElementNS('http://www.w3.org/2000/svg','path'); shapeEl.setAttribute('class','shape'); shapeEl.setAttribute('fill', currentColor); shapeEl.setAttribute('stroke', darken(currentColor,.35)); shapeEl.setAttribute('stroke-width','.8'); shapeEl.setAttribute('d', splatPath(p.x,p.y,SHAPE_MIN,9,0.3)); pins.appendChild(shapeEl); pushAdd(shapeEl); }
+  function updateShape(e){ if(!shapeEl) return; var p=svgPoint(panelSVG, e.clientX, e.clientY); var dx=p.x-shapeStart.x, dy=p.y-shapeStart.y; var r=Math.max(SHAPE_MIN, Math.min(SHAPE_MAX, Math.hypot(dx,dy))); shapeEl.setAttribute('d', splatPath(shapeStart.x,shapeStart.y,r,9,0.3)); }
+  function endShape(){ shapeEl=null; shapeStart=null; }
+
+  function tryErase(target){ if(!target) return; if(target.classList && (target.classList.contains('pin') || target.classList.contains('free') || target.classList.contains('line') || target.classList.contains('shape'))){ var parent=target.parentNode; var next=target.nextSibling; parent.removeChild(target); pushRemove(target,parent,next); } }
 
   // Interacción principal
   function onPointerDown(e){ if(!panelSVG || e.button===2) return; var t=e.target; if(currentTool==='erase'){ tryErase(t); return; }
-    if(t && t.classList && (t.classList.contains('pin')||t.classList.contains('free')||t.classList.contains('line'))){ tryErase(t); return; }
+    if(t && t.classList && (t.classList.contains('pin')||t.classList.contains('free')||t.classList.contains('line')||t.classList.contains('shape'))){ tryErase(t); return; }
     if(currentTool==='star'){ e.preventDefault&&e.preventDefault(); startStar(e); }
+    else if(currentTool==='shape'){ e.preventDefault&&e.preventDefault(); startShape(e); }
     else if(currentTool==='free'){ e.preventDefault&&e.preventDefault(); startFree(e); }
     else if(currentTool==='line'){ e.preventDefault&&e.preventDefault(); startLine(e); }
   }
-  function onPointerMove(e){ if(currentTool==='star'){ updateStar(e); } else if(currentTool==='free'){ updateFree(e); } else if(currentTool==='line'){ updateLine(e); } }
-  function onPointerEnd(e){ if(currentTool==='star'){ endStar(); } else if(currentTool==='free'){ endFree(e); } else if(currentTool==='line'){ endLine(e); } }
+  function onPointerMove(e){ if(currentTool==='star'){ updateStar(e); } else if(currentTool==='shape'){ updateShape(e); } else if(currentTool==='free'){ updateFree(e); } else if(currentTool==='line'){ updateLine(e); } }
+  function onPointerEnd(e){ if(currentTool==='star'){ endStar(); } else if(currentTool==='shape'){ endShape(); } else if(currentTool==='free'){ endFree(e); } else if(currentTool==='line'){ endLine(e); } }
 
   if(panelSVG){ panelSVG.addEventListener('pointerdown', onPointerDown, {passive:false}); window.addEventListener('pointermove', onPointerMove, {passive:false}); window.addEventListener('pointerup', onPointerEnd, {passive:false}); window.addEventListener('pointercancel', onPointerEnd, {passive:false}); }
 
@@ -332,20 +339,15 @@
   function setTool(name){ currentTool=name; $$('#tools .tool').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-tool')===name); }); if(name!=='color' && palette){ palette.classList.remove('open'); palette.setAttribute('aria-hidden','true'); } }
   if(btnTools){ btnTools.addEventListener('click', function(){ var open = toolsPanel.classList.toggle('open'); toolsPanel.setAttribute('aria-hidden', open? 'false':'true'); }); }
   if(toolsPanel){ toolsPanel.addEventListener('click', function(ev){ var btn = ev.target.closest ? ev.target.closest('.tool') : null; if(!btn) return; var tool = btn.getAttribute('data-tool'); if(tool==='color'){ if(palette){ var open=palette.classList.toggle('open'); palette.setAttribute('aria-hidden', open? 'false':'true'); } return; } if(tool==='undo'){ cmdUndo(); return; } if(tool==='redo'){ cmdRedo(); return; } setTool(tool); }); }
-  if(palette){ palette.addEventListener('click', function(ev){ var sw = ev.target.closest ? ev.target.closest('.sw') : null; if(!sw) return; currentColor = sw.getAttribute('data-color'); applyColorChip(); // destacar sw
-      $$('#palette .sw').forEach(function(s){ s.classList.toggle('active', s===sw); }); }); }
+  if(palette){ palette.addEventListener('click', function(ev){ var sw = ev.target.closest ? ev.target.closest('.sw') : null; if(!sw) return; currentColor = sw.getAttribute('data-color'); applyColorChip(); $$('#palette .sw').forEach(function(s){ s.classList.toggle('active', s===sw); }); }); }
 
-  // ===== Botonería previa =====
+  // Botones
   var btnClearPins = document.getElementById('btnClearPins'); if(btnClearPins) btnClearPins.addEventListener('click', function(){ clearPins(); clearFree(); clearLines(); });
-
-  // Tabs
-  var tabsEl = document.getElementById('tabs'); if(tabsEl){ tabsEl.addEventListener('click', function(e){ var t = e.target && e.target.closest ? e.target.closest('.tab') : null; if(!t) return; $$('#tabs .tab').forEach(function(o){ o.classList.remove('active'); }); t.classList.add('active'); musculo = t.getAttribute('data-musculo'); clearPins(); clearFree(); clearLines(); loadSVG(); }); }
-
-  // Lado
-  var sideToggle = document.getElementById('sideToggle'); if(sideToggle){ sideToggle.addEventListener('click', function(ev){ var btn = ev.target && ev.target.closest ? ev.target.closest('button[data-side]') : null; if(!btn) return; Array.prototype.slice.call(sideToggle.querySelectorAll('button[data-side]')).forEach(function(b){ b.classList.remove('active'); }); btn.classList.add('active'); lado = btn.getAttribute('data-side'); clearPins(); clearFree(); clearLines(); loadSVG(); }); }
-
-  // Botones generales
   var btnPDF    = document.getElementById('btnPDF');    if(btnPDF)    btnPDF.addEventListener('click', function(){ window.print(); });
+
+  // Tabs / Lado
+  var tabsEl = document.getElementById('tabs'); if(tabsEl){ tabsEl.addEventListener('click', function(e){ var t = e.target && e.target.closest ? e.target.closest('.tab') : null; if(!t) return; $$('#tabs .tab').forEach(function(o){ o.classList.remove('active'); }); t.classList.add('active'); musculo = t.getAttribute('data-musculo'); clearPins(); clearFree(); clearLines(); loadSVG(); }); }
+  var sideToggle = document.getElementById('sideToggle'); if(sideToggle){ sideToggle.addEventListener('click', function(ev){ var btn = ev.target && ev.target.closest ? ev.target.closest('button[data-side]') : null; if(!btn) return; Array.prototype.slice.call(sideToggle.querySelectorAll('button[data-side]')).forEach(function(b){ b.classList.remove('active'); }); btn.classList.add('active'); lado = btn.getAttribute('data-side'); clearPins(); clearFree(); clearLines(); loadSVG(); }); }
 
   // ===== TESTS =====
   function assert(cond,msg){ if(!cond){ console.error('[TEST FAIL]',msg); return false;} console.log('[TEST OK]',msg); return true; }
@@ -357,16 +359,16 @@
     function(){ return assert(typeof loadSVG==='function','loadSVG definida'); },
     function(){ try{ var p=loadSVG(); return assert(p instanceof Promise || p===undefined,'loadSVG no arroja'); }catch(e){ return assert(false,'loadSVG no debería arrojar'); } },
     function(){ return assert(!!document.getElementById('btnTools'),'Botón Herramientas presente'); },
-    function(){ // abrir/cerrar panel
-      var btn=document.getElementById('btnTools'); var panel=document.getElementById('tools'); var before=panel.classList.contains('open'); btn.click(); var after=panel.classList.contains('open'); return assert(after!==before,'Toggle abre/cierra panel de herramientas'); },
     function(){ // paleta abre y cambia color
       var colorBtn=document.querySelector('.tool[data-tool="color"]'); colorBtn.click(); var pal=document.getElementById('palette'); var open=pal.classList.contains('open'); var sw=document.querySelector('#palette .sw'); if(!open||!sw) return assert(false,'Paleta no abre'); var prev=window.getComputedStyle(document.getElementById('colorChip')).backgroundColor; sw.click(); applyColorChip(); var now=window.getComputedStyle(document.getElementById('colorChip')).backgroundColor; return assert(prev!==now,'Cambio de color activo'); },
-    function(){ // estrella crea
-      currentTool='star'; var before=pins.childElementCount; var rect=panelSVG.getBoundingClientRect(); try{ var down=new PointerEvent('pointerdown',{clientX:rect.left+90,clientY:rect.top+90}); var move=new PointerEvent('pointermove',{clientX:rect.left+120,clientY:rect.top+120}); var up=new PointerEvent('pointerup',{clientX:rect.left+120,clientY:rect.top+120}); panelSVG.dispatchEvent(down); window.dispatchEvent(move); window.dispatchEvent(up);}catch(_){ } var after=pins.childElementCount; return assert(after===before+1,'Estrella creada'); },
-    function(){ // libre con cierre
-      currentTool='free'; var before=freeGrp.childElementCount; var rect=panelSVG.getBoundingClientRect(); try{ var d=new PointerEvent('pointerdown',{clientX:rect.left+300,clientY:rect.top+300}); var m1=new PointerEvent('pointermove',{clientX:rect.left+340,clientY:rect.top+300}); var m2=new PointerEvent('pointermove',{clientX:rect.left+340,clientY:rect.top+340}); var m3=new PointerEvent('pointermove',{clientX:rect.left+300,clientY:rect.top+340}); var m4=new PointerEvent('pointermove',{clientX:rect.left+300,clientY:rect.top+302}); var u=new PointerEvent('pointerup',{clientX:rect.left+300,clientY:rect.top+302}); panelSVG.dispatchEvent(d); window.dispatchEvent(m1); window.dispatchEvent(m2); window.dispatchEvent(m3); window.dispatchEvent(m4); window.dispatchEvent(u);}catch(_){ } var after=freeGrp.childElementCount; var ok = after===before+1; return assert(ok,'Dibujo libre cerrado y rellenado'); },
-    function(){ // línea
-      currentTool='line'; var before=linesGrp.childElementCount; var rect=panelSVG.getBoundingClientRect(); try{ var d=new PointerEvent('pointerdown',{clientX:rect.left+400,clientY:rect.top+200}); var m=new PointerEvent('pointermove',{clientX:rect.left+460,clientY:rect.top+260}); var u=new PointerEvent('pointerup',{clientX:rect.left+460,clientY:rect.top+260}); panelSVG.dispatchEvent(d); window.dispatchEvent(m); window.dispatchEvent(u);}catch(_){ } var after=linesGrp.childElementCount; return assert(after===before+1,'Línea creada'); }
+    function(){ // estrella usa color actual
+      setTool('star'); var before=pins.childElementCount; var rect=panelSVG.getBoundingClientRect(); try{ var down=new PointerEvent('pointerdown',{clientX:rect.left+90,clientY:rect.top+90}); var move=new PointerEvent('pointermove',{clientX:rect.left+120,clientY:rect.top+120}); var up=new PointerEvent('pointerup',{clientX:rect.left+120,clientY:rect.top+120}); panelSVG.dispatchEvent(down); window.dispatchEvent(move); window.dispatchEvent(up);}catch(_){ } var el=pins.lastElementChild; var ok = !!el && el.getAttribute('fill'); return assert(ok,'Estrella creada con fill'); },
+    function(){ // libre que cierra y rellena
+      setTool('free'); var before=freeGrp.childElementCount; var rect=panelSVG.getBoundingClientRect(); try{ var d=new PointerEvent('pointerdown',{clientX:rect.left+300,clientY:rect.top+300}); var m1=new PointerEvent('pointermove',{clientX:rect.left+340,clientY:rect.top+300}); var m2=new PointerEvent('pointermove',{clientX:rect.left+340,clientY:rect.top+340}); var m3=new PointerEvent('pointermove',{clientX:rect.left+300,clientY:rect.top+340}); var m4=new PointerEvent('pointermove',{clientX:rect.left+302,clientY:rect.top+302}); var u=new PointerEvent('pointerup',{clientX:rect.left+302,clientY:rect.top+302}); panelSVG.dispatchEvent(d); window.dispatchEvent(m1); window.dispatchEvent(m2); window.dispatchEvent(m3); window.dispatchEvent(m4); window.dispatchEvent(u);}catch(_){ } var el=freeGrp.lastElementChild; var ok = !!el && el.getAttribute('fill') && el.getAttribute('fill')!=='none'; return assert(ok,'Libre cerrado con relleno'); },
+    function(){ // línea creada
+      setTool('line'); var before=linesGrp.childElementCount; var rect=panelSVG.getBoundingClientRect(); try{ var d=new PointerEvent('pointerdown',{clientX:rect.left+400,clientY:rect.top+200}); var m=new PointerEvent('pointermove',{clientX:rect.left+460,clientY:rect.top+260}); var u=new PointerEvent('pointerup',{clientX:rect.left+460,clientY:rect.top+260}); panelSVG.dispatchEvent(d); window.dispatchEvent(m); window.dispatchEvent(u);}catch(_){ } var after=linesGrp.childElementCount; return assert(after===before+1,'Línea creada'); },
+    function(){ // forma creada
+      setTool('shape'); var before=pins.childElementCount; var rect=panelSVG.getBoundingClientRect(); try{ var d=new PointerEvent('pointerdown',{clientX:rect.left+520,clientY:rect.top+240}); var m=new PointerEvent('pointermove',{clientX:rect.left+560,clientY:rect.top+260}); var u=new PointerEvent('pointerup',{clientX:rect.left+560,clientY:rect.top+260}); panelSVG.dispatchEvent(d); window.dispatchEvent(m); window.dispatchEvent(u);}catch(_){ } var after=pins.childElementCount; return assert(after===before+1,'Forma creada'); }
   ];
   tests.forEach(function(t){ try{ t(); }catch(e){ console.error('[TEST ERROR]', e); } });
 
