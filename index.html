@@ -50,7 +50,7 @@
   .tool{width:32px;height:32px;border-radius:8px;border:1px solid rgba(231,236,243,.25);background:transparent;color:#e8eef7;display:flex;align-items:center;justify-content:center;cursor:pointer;margin:6px 0}
   .tool.active{background:rgba(231,236,243,.15);border-color:#e7ecf3}
   .tool svg{width:18px;height:18px}
-  .tool input[type=color]{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+  .tool input[type=color]{position:absolute;left:-9999px;opacity:0;width:0;height:0}
 
   /* Panel características (3 columnas fijas) */
   .caract{background:var(--panel);color:var(--ink);padding:1rem 1.25rem 1.25rem;border-top:1px solid var(--line)}
@@ -302,10 +302,10 @@
   var btnClearPins = document.getElementById('btnClearPins'); if(btnClearPins) btnClearPins.addEventListener('click', clearPins);
 
   // Tabs
-  var tabsEl = document.getElementById('tabs'); if(tabsEl){ tabsEl.addEventListener('click', function(e){ var t = e.target && e.target.closest ? e.target.closest('.tab') : null; if(!t) return; $$('#tabs .tab').forEach(function(o){ o.classList.remove('active'); }); t.classList.add('active'); musculo = t.getAttribute('data-musculo'); clearPins(); $$('##free path').forEach(function(p){ p.parentNode.removeChild(p); }); loadSVG(); }); }
+  var tabsEl = document.getElementById('tabs'); if(tabsEl){ tabsEl.addEventListener('click', function(e){ var t = e.target && e.target.closest ? e.target.closest('.tab') : null; if(!t) return; $$('#tabs .tab').forEach(function(o){ o.classList.remove('active'); }); t.classList.add('active'); musculo = t.getAttribute('data-musculo'); clearPins(); document.querySelectorAll('#free path').forEach(function(p){ p.parentNode.removeChild(p); }); loadSVG(); }); }
 
   // Lado
-  var sideToggle = document.getElementById('sideToggle'); if(sideToggle){ sideToggle.addEventListener('click', function(ev){ var btn = ev.target && ev.target.closest ? ev.target.closest('button[data-side]') : null; if(!btn) return; Array.prototype.slice.call(sideToggle.querySelectorAll('button[data-side]')).forEach(function(b){ b.classList.remove('active'); }); btn.classList.add('active'); lado = btn.getAttribute('data-side'); clearPins(); $$('##free path').forEach(function(p){ p.parentNode.removeChild(p); }); loadSVG(); }); }
+  var sideToggle = document.getElementById('sideToggle'); if(sideToggle){ sideToggle.addEventListener('click', function(ev){ var btn = ev.target && ev.target.closest ? ev.target.closest('button[data-side]') : null; if(!btn) return; Array.prototype.slice.call(sideToggle.querySelectorAll('button[data-side]')).forEach(function(b){ b.classList.remove('active'); }); btn.classList.add('active'); lado = btn.getAttribute('data-side'); clearPins(); document.querySelectorAll('#free path').forEach(function(p){ p.parentNode.removeChild(p); }); loadSVG(); }); }
 
   // Botones generales
   var btnPDF    = document.getElementById('btnPDF');    if(btnPDF)    btnPDF.addEventListener('click', function(){ window.print(); });
@@ -330,6 +330,8 @@
       setTool('free'); var before=freeGrp.childElementCount; var rect=panelSVG.getBoundingClientRect(); try{ var down=new PointerEvent('pointerdown',{clientX:rect.left+120,clientY:rect.top+120}); var move=new PointerEvent('pointermove',{clientX:rect.left+150,clientY:rect.top+150}); var up=new PointerEvent('pointerup',{clientX:rect.left+160,clientY:rect.top+160}); panelSVG.dispatchEvent(down); window.dispatchEvent(move); window.dispatchEvent(up);}catch(_){ } var after=freeGrp.childElementCount; return assert(after===before+1,'Herramienta dibujo libre crea trazo'); }
   ];
   tests.forEach(function(t){ try{ t(); }catch(e){ console.error('[TEST ERROR]', e); } });
+  // Limpieza visual tras tests (evita que queden marcas iniciales)
+  try{ clearPins(); Array.prototype.slice.call(document.querySelectorAll('#free path')).forEach(function(p){ p.parentNode.removeChild(p); }); }catch(_){ }
 
   // Carga inicial y estado inicial
   loadSVG();
