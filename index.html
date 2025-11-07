@@ -288,9 +288,7 @@
   var starPath = function(cx,cy,r,spikes){ if(spikes==null) spikes=5; var inner=r*0.48; var rot=Math.PI/2*3, x=cx, y=cy, step=Math.PI/spikes, d='M ' + cx + ' ' + (cy-r);
     for(var i=0;i<spikes;i++){ x=cx+Math.cos(rot)*r; y=cy+Math.sin(rot)*r; d+=' L ' + x + ' ' + y; rot+=step; x=cx+Math.cos(rot)*inner; y=cy+Math.sin(rot)*inner; d+=' L ' + x + ' ' + y; rot+=step; } return d+' Z'; };
   // Splotch/forma tipo "mancha"
-  function splatPath(cx,cy,r,lobes,irreg){ if(lobes==null) lobes=8; if(irreg==null) irreg=0.35; var d='';
-    for(var i=0;i<=lobes;i++){ var a=(i/lobes)*Math.PI*2; var rr=r*(1 - irreg + Math.random()*irreg*2); var x=cx+Math.cos(a)*rr; var y=cy+Math.sin(a)*rr; d += (i===0? 'M ':' L ')+x+' '+y; }
-    return d+' Z'; }
+  function burstPath(cx,cy,r,points,ratio){ if(points==null) points=14; if(ratio==null) ratio=0.45; var d=''; for(var i=0;i<points;i++){ var ang=(i/points)*Math.PI*2; var rr=(i%2===0)? r : r*ratio; var x=cx+Math.cos(ang)*rr; var y=cy+Math.sin(ang)*rr; d += (i===0? 'M ':' L ')+x+' '+y; } return d+' Z'; }
 
   // Estados de dibujo
   var drawing=null, start=null;        // estrella
@@ -307,13 +305,14 @@
   function endFree(e){ if(!freePath) return; var last = freeLast || freeStart; var dist=Math.hypot(last.x-freeStart.x, last.y-freeStart.y);
     if(dist<24 && freeD.split('L').length>6){ freeD += ' Z'; freePath.setAttribute('d', freeD); freePath.setAttribute('fill', currentColor); freePath.setAttribute('stroke', darken(currentColor,.35)); }
     freePath=null; freeD=''; freeStart=null; freeLast=null; }
+    freePath=null; freeD=''; freeStart=null; freeLast=null; }
 
   function startLine(e){ var p=svgPoint(panelSVG, e.clientX, e.clientY); lineStart=p; lineEl=document.createElementNS('http://www.w3.org/2000/svg','line'); lineEl.setAttribute('class','line'); lineEl.setAttribute('x1', p.x); lineEl.setAttribute('y1', p.y); lineEl.setAttribute('x2', p.x); lineEl.setAttribute('y2', p.y); lineEl.setAttribute('stroke', darken(currentColor,.25)); lineEl.setAttribute('stroke-width','1.4'); linesGrp.appendChild(lineEl); pushAdd(lineEl); }
   function updateLine(e){ if(!lineEl) return; var p=svgPoint(panelSVG, e.clientX, e.clientY); lineEl.setAttribute('x2', p.x); lineEl.setAttribute('y2', p.y); }
   function endLine(e){ if(!lineEl) return; var p=svgPoint(panelSVG, e.clientX, e.clientY); var len=Math.hypot(p.x-lineStart.x, p.y-lineStart.y); if(len<6){ var parent=lineEl.parentNode; var next=lineEl.nextSibling; parent.removeChild(lineEl); undoStack.pop(); } lineEl=null; lineStart=null; }
 
-  function startShape(e){ var p=svgPoint(panelSVG, e.clientX, e.clientY); shapeStart=p; shapeEl=document.createElementNS('http://www.w3.org/2000/svg','path'); shapeEl.setAttribute('class','shape'); shapeEl.setAttribute('fill', currentColor); shapeEl.setAttribute('stroke', darken(currentColor,.35)); shapeEl.setAttribute('stroke-width','.8'); shapeEl.setAttribute('d', splatPath(p.x,p.y,SHAPE_MIN,9,0.3)); pins.appendChild(shapeEl); pushAdd(shapeEl); }
-  function updateShape(e){ if(!shapeEl) return; var p=svgPoint(panelSVG, e.clientX, e.clientY); var dx=p.x-shapeStart.x, dy=p.y-shapeStart.y; var r=Math.max(SHAPE_MIN, Math.min(SHAPE_MAX, Math.hypot(dx,dy))); shapeEl.setAttribute('d', splatPath(shapeStart.x,shapeStart.y,r,9,0.3)); }
+  function startShape(e){ var p=svgPoint(panelSVG, e.clientX, e.clientY); shapeStart=p; shapeEl=document.createElementNS('http://www.w3.org/2000/svg','path'); shapeEl.setAttribute('class','shape'); shapeEl.setAttribute('fill', currentColor); shapeEl.setAttribute('stroke', darken(currentColor,.35)); shapeEl.setAttribute('stroke-width','.8'); shapeEl.setAttribute('d', burstPath(p.x,p.y,SHAPE_MIN,14,0.45)); pins.appendChild(shapeEl); pushAdd(shapeEl); }
+  function updateShape(e){ if(!shapeEl) return; var p=svgPoint(panelSVG, e.clientX, e.clientY); var dx=p.x-shapeStart.x, dy=p.y-shapeStart.y; var r=Math.max(SHAPE_MIN, Math.min(SHAPE_MAX, Math.hypot(dx,dy))); shapeEl.setAttribute('d', burstPath(shapeStart.x,shapeStart.y,r,14,0.45)); }
   function endShape(){ shapeEl=null; shapeStart=null; }
 
   function tryErase(target){ if(!target) return; if(target.classList && (target.classList.contains('pin') || target.classList.contains('free') || target.classList.contains('line') || target.classList.contains('shape'))){ var parent=target.parentNode; var next=target.nextSibling; parent.removeChild(target); pushRemove(target,parent,next); } }
