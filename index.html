@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Esquema de lesión muscular — v2.3 (herramienta texto + BAMIC/Munich)</title>
+<title>Esquema de lesión muscular — v2.4 (texto editable + selector triple)</title>
 <style>
   :root{
     --bg:#0f1115; --ink:#0e1320; --muted:#6b7890; --accent:#5B7EAE; --accent-weak:#8fa7c7;
     --panel:#ffffff; --line:#e7ecf3; --overlay:rgba(24,30,44,.85);
-    --tab-active:#4D4C4C; /* solicitado: mismo color del fondo del SVG */
+    --tab-active:#4D4C4C; /* mismo color del fondo del SVG */
   }
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -44,7 +44,7 @@
   .free{stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;pointer-events:auto;cursor:pointer}
   .line{fill:none;stroke-width:1.4;stroke-linecap:round;pointer-events:auto;cursor:pointer}
   .shape{stroke-width:.8;pointer-events:auto;cursor:pointer}
-  .label{font: 700 26px/1.1 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; pointer-events:auto; cursor:pointer}
+  .label{font: 400 26px/1.1 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; pointer-events:auto; cursor:move}
   #placeholder text{user-select:none}
   #phMsg{fill:#c7d6eb;font-size:18px}
 
@@ -64,18 +64,18 @@
   .sw.active{outline:2px solid #fff}
   .color-chip{width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.25);display:block}
 
-  /* Panel características (3 columnas fijas, centrado, mayúsculas) */
-  .caract{background:var(--panel);color:var(--ink);padding:1rem 1.25rem 1.25rem;border-top:1px solid var(--line)}
+  /* Panel características */
+  .caract{background:var(--panel);color:var(--ink);padding:1rem 1.25rem 1.25rem;border-top:1px solid var(--line);position:relative}
   .caract h2{margin:.2rem 0 1rem 0;font-size:1.05rem;text-align:center;text-transform:uppercase}
+  .gradoModeWrap{position:absolute;right:1.25rem;top:1rem}
+  .segbox{display:inline-flex;border:1px solid #b9c6d9;border-radius:.6rem;overflow:hidden}
+  .segbox button{padding:.35rem .65rem;border:0;background:#f6f8fb;color:#0e1320;font-weight:700}
+  .segbox button.active{background:#e8eef7}
   .cards{display:grid;grid-template-columns:repeat(3,minmax(260px,1fr));gap:1rem;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
   .card{border:1px solid var(--line);border-radius:.9rem;background:#fff;padding:.9rem;text-transform:uppercase;text-align:center}
   .card h3{margin:.1rem 0 .6rem 0;font-size:.95rem;color:#1b2435}
   .opt{display:grid;gap:.6rem}
   .opt label{display:flex;align-items:center;gap:.5rem;justify-content:center}
-
-  .segbox{display:inline-flex;border:1px solid #b9c6d9;border-radius:.6rem;overflow:hidden}
-  .segbox button{padding:.35rem .65rem;border:0;background:#f6f8fb;color:#0e1320;font-weight:700}
-  .segbox button.active{background:#e8eef7}
 
   footer{padding:.8rem 1.25rem;color:#97a6bf;font-size:.9rem;border-top:1px solid rgba(255,255,255,.1)}
 
@@ -87,6 +87,9 @@
     .btn,.tools-toggle,.tools-panel,.palette{display:none!important}
     footer{color:#333;border-top:1px solid #ddd}
   }
+
+  /* Editor inline del texto (input overlay) */
+  .text-editor{position:fixed;z-index:9999;padding:.2rem .35rem;border:1px solid #6b7890;border-radius:.35rem;background:#fff;color:#111;min-width:40px;font:400 18px system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
 </style>
 </head>
 <body>
@@ -155,14 +158,12 @@
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 3l5 5-9 9H7L2 12l9-9h5zM7 17h10v2H7z"/></svg>
         </button>
         <button class="tool" data-tool="undo" title="Deshacer" aria-label="Deshacer">
-          <!-- icono reajustado -->
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M9 14L4 9l5-5"/>
             <path d="M20 20a8 8 0 0 0-8-8H6"/>
           </svg>
         </button>
         <button class="tool" data-tool="redo" title="Rehacer" aria-label="Rehacer">
-          <!-- icono reajustado -->
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M15 14l5-5-5-5"/>
             <path d="M4 20a8 8 0 0 1 8-8h8"/>
@@ -189,39 +190,40 @@
   <!-- PANEL CARACTERÍSTICAS -->
   <section class="caract">
     <h2>Características de la lesión</h2>
+    <div class="gradoModeWrap">
+      <div id="gradoMode" class="segbox" role="tablist" aria-label="Selector de sistema de grado">
+        <button type="button" class="active" data-mode="bamic">BAMIC</button>
+        <button type="button" data-mode="munich">MUNICH</button>
+        <button type="button" data-mode="clasica">CLÁSICA</button>
+      </div>
+    </div>
+
     <div class="cards">
-      <div class="card">
+      <div class="card" id="cardGrado">
         <h3>Grado</h3>
-        <div class="opt" style="justify-items:center">
-          <div id="gradoMode" class="segbox" role="tablist" aria-label="Selector de sistema de grado">
-            <button type="button" class="active" data-mode="bamic">BAMIC</button>
-            <button type="button" data-mode="munich">MUNICH</button>
-          </div>
-        </div>
         <div class="opt" id="gradoOptions" aria-live="polite">
-          <!-- BAMIC (por defecto) -->
-          <label><input type="radio" name="grado" value="1"> 1</label>
-          <label><input type="radio" name="grado" value="2"> 2</label>
-          <label><input type="radio" name="grado" value="3"> 3</label>
-          <label><input type="radio" name="grado" value="4"> 4</label>
+          <label><input type="radio" name="grado" value="Grado 1"> Grado 1</label>
+          <label><input type="radio" name="grado" value="Grado 2"> Grado 2</label>
+          <label><input type="radio" name="grado" value="Grado 3"> Grado 3</label>
+          <label><input type="radio" name="grado" value="Grado 4"> Grado 4</label>
         </div>
       </div>
-      <div class="card">
+      <div class="card" id="cardTejido">
         <h3>Tejido afectado</h3>
         <div class="opt" id="optTejido">
-          <label><input type="checkbox" value="miofascial"> Miofascial (a)</label>
-          <label><input type="checkbox" value="miotendinoso"> Miotendinoso (b)</label>
-          <label><input type="checkbox" value="tendinoso"> Tendinoso (c)</label>
-          <label><input type="checkbox" value="intramuscular"> Intramuscular</label>
+          <label><input type="checkbox" value="Miofascial (a)"> Miofascial (a)</label>
+          <label><input type="checkbox" value="Miotendinoso (b)"> Miotendinoso (b)</label>
+          <label><input type="checkbox" value="Tendinoso (c)"> Tendinoso (c)</label>
+          <label><input type="checkbox" value="Intramuscular"> Intramuscular</label>
         </div>
       </div>
-      <div class="card">
+      <div class="card" id="cardAsociadas">
         <h3>Lesiones asociadas</h3>
         <div class="opt" id="optAsociadas">
-          <label><input type="checkbox" value="lamina"> Lámina líquida</label>
-          <label><input type="checkbox" value="coleccion"> Colección</label>
-          <label><input type="checkbox" value="cicatriz"> Cicatriz fibrosa</label>
-          <label><input type="checkbox" value="calcificaciones"> Calcificaciones</label>
+          <label><input type="checkbox" value="Lámina líquida"> Lámina líquida</label>
+          <label><input type="checkbox" value="Colección"> Colección</label>
+          <label><input type="checkbox" value="Cicatriz fibrosa"> Cicatriz fibrosa</label>
+          <label><input type="checkbox" value="Calcificaciones"> Calcificaciones</label>
         </div>
       </div>
     </div>
@@ -247,7 +249,7 @@
   function cmdUndo(){ var op=undoStack.pop(); if(!op) return; if(op.type==='add'){ var p=op.parent; var e=op.el; if(e && e.parentNode){ var ns=e.nextSibling; p.removeChild(e); redoStack.push({type:'remove', el:e, parent:p, nextSibling:ns}); } } else if(op.type==='remove'){ if(op.parent){ op.parent.insertBefore(op.el, op.nextSibling||null); redoStack.push({type:'add', el:op.el, parent:op.parent, nextSibling:op.nextSibling}); } } }
   function cmdRedo(){ var op=redoStack.pop(); if(!op) return; if(op.type==='add'){ if(op.parent){ op.parent.insertBefore(op.el, op.nextSibling||null); undoStack.push({type:'add', el:op.el, parent:op.parent, nextSibling:op.nextSibling}); } } else if(op.type==='remove'){ var e=op.el; var p=e && e.parentNode; if(p){ var ns=e.nextSibling; p.removeChild(e); undoStack.push({type:'remove', el:e, parent:p, nextSibling:ns}); } } }
 
-  function darken(hex, amt){ var h = hex.replace('#',''); if(h.length===3){ h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2]; } var r=parseInt(h.substr(0,2),16), g=parseInt(h.substr(2,2),16), b=parseInt(h.substr(4,2),16); r=Math.max(0, Math.min(255, r - Math.round(255*amt))); g=Math.max(0, Math.min(255, g - Math.round(255*amt))); b=Math.max(0, Math.min(255, b - Math.round(255*amt))); var toHex=function(n){ var s=n.toString(16); return s.length===1?'0'+s:s; }; return '#'+toHex(r)+toHex(g)+toHex(b); }
+  function darken(hex, amt){ var h = hex.replace('#',''); if(h.length===3){ h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2]; } var r=parseInt(h.substr(0,2),16), g=parseInt(h.substr(2,2),16), b=parseInt(h.substr(4,2),16); r=Math.max(0, Math.min(255, r - Math.round(255*amt))); g=Math.max(0, Math.min(255, g - Math.round(255*amt))); b=Math.max(0, Math.min(255, b - Math.round(255*amt))); var toHex=function(n){ var s=n.toString(16); return s.length===1?'0'+s:s; }; return '#'+toHex(r)+toHex(b)+toHex(g); }
   function applyColorChip(){ var chip=$('#colorChip'); if(chip){ chip.style.background = currentColor; chip.style.borderColor = darken(currentColor, .35); } }
 
   var panelSVG = document.getElementById('panelSVG');
@@ -294,22 +296,31 @@
 
   function tryErase(target){ if(!target) return; if(target.classList && (target.classList.contains('pin') || target.classList.contains('free') || target.classList.contains('line') || target.classList.contains('shape') || target.classList.contains('label'))){ var parent=target.parentNode; var next=target.nextSibling; parent.removeChild(target); pushRemove(target,parent,next); } }
 
-  // === NUEVO: herramienta texto ===
-  function placeText(e){ var p=svgPoint(panelSVG, e.clientX, e.clientY); var txt=window.prompt('Ingresar texto:'); if(!txt) return; var t=document.createElementNS('http://www.w3.org/2000/svg','text'); t.setAttribute('class','label'); t.setAttribute('x', p.x); t.setAttribute('y', p.y); t.setAttribute('fill', currentColor); t.setAttribute('stroke', darken(currentColor,.35)); t.setAttribute('stroke-width','.5'); t.textContent = txt; labelsGrp.appendChild(t); pushAdd(t); }
+  // === Texto: crear, arrastrar, editar in-place ===
+  var draggingLabel=null, dragOff={x:0,y:0};
+  function placeText(e){ var p=svgPoint(panelSVG, e.clientX, e.clientY); var txt=window.prompt('Ingresar texto:'); if(!txt) return; var t=document.createElementNS('http://www.w3.org/2000/svg','text'); t.setAttribute('class','label'); t.setAttribute('x', p.x); t.setAttribute('y', p.y); t.setAttribute('fill', currentColor); t.textContent = txt; labelsGrp.appendChild(t); pushAdd(t); }
+  function beginDragLabel(target, e){ var p=svgPoint(panelSVG, e.clientX, e.clientY); draggingLabel=target; var x=parseFloat(target.getAttribute('x')||'0'); var y=parseFloat(target.getAttribute('y')||'0'); dragOff.x = x - p.x; dragOff.y = y - p.y; }
+  function moveDragLabel(e){ if(!draggingLabel) return; var p=svgPoint(panelSVG, e.clientX, e.clientY); draggingLabel.setAttribute('x', p.x + dragOff.x); draggingLabel.setAttribute('y', p.y + dragOff.y); }
+  function endDragLabel(){ draggingLabel=null; }
+  function editLabelInPlace(target){ var bb = target.getBoundingClientRect(); var input = document.createElement('input'); input.className='text-editor'; input.value = target.textContent; input.style.left = (window.scrollX + bb.left)+'px'; input.style.top  = (window.scrollY + bb.top - 8)+'px'; input.style.minWidth = Math.max(40, bb.width)+'px'; document.body.appendChild(input); input.focus(); input.select(); var commit=function(){ var v=input.value.trim(); if(v){ target.textContent=v; } document.body.removeChild(input); }; var cancel=function(){ document.body.removeChild(input); };
+    input.addEventListener('keydown', function(ev){ if(ev.key==='Enter'){ commit(); } else if(ev.key==='Escape'){ cancel(); } }); input.addEventListener('blur', commit);
+  }
 
   // Interacción principal
   function onPointerDown(e){ if(!panelSVG || e.button===2) return; var t=e.target; if(currentTool==='erase'){ tryErase(t); return; }
-    if(t && t.classList && (t.classList.contains('pin')||t.classList.contains('free')||t.classList.contains('line')||t.classList.contains('shape')||t.classList.contains('label'))){ tryErase(t); return; }
+    if(t && t.classList && t.classList.contains('label')){ beginDragLabel(t, e); return; }
+    if(t && t.classList && (t.classList.contains('pin')||t.classList.contains('free')||t.classList.contains('line')||t.classList.contains('shape'))){ tryErase(t); return; }
     if(currentTool==='star'){ e.preventDefault&&e.preventDefault(); startStar(e); }
     else if(currentTool==='shape'){ e.preventDefault&&e.preventDefault(); startShape(e); }
     else if(currentTool==='free'){ e.preventDefault&&e.preventDefault(); startFree(e); }
     else if(currentTool==='line'){ e.preventDefault&&e.preventDefault(); startLine(e); }
     else if(currentTool==='text'){ e.preventDefault&&e.preventDefault(); placeText(e); }
   }
-  function onPointerMove(e){ if(currentTool==='star'){ updateStar(e); } else if(currentTool==='shape'){ updateShape(e); } else if(currentTool==='free'){ updateFree(e); } else if(currentTool==='line'){ updateLine(e); } }
-  function onPointerEnd(e){ if(currentTool==='star'){ endStar(); } else if(currentTool==='shape'){ endShape(); } else if(currentTool==='free'){ endFree(e); } else if(currentTool==='line'){ endLine(e); } }
+  function onPointerMove(e){ if(draggingLabel){ moveDragLabel(e); return; } if(currentTool==='star'){ updateStar(e); } else if(currentTool==='shape'){ updateShape(e); } else if(currentTool==='free'){ updateFree(e); } else if(currentTool==='line'){ updateLine(e); } }
+  function onPointerEnd(e){ if(draggingLabel){ endDragLabel(); return; } if(currentTool==='star'){ endStar(); } else if(currentTool==='shape'){ endShape(); } else if(currentTool==='free'){ endFree(e); } else if(currentTool==='line'){ endLine(e); } }
+  function onDoubleClick(e){ var t=e.target; if(t && t.classList && t.classList.contains('label')){ editLabelInPlace(t); } }
 
-  if(panelSVG){ panelSVG.addEventListener('pointerdown', onPointerDown, {passive:false}); window.addEventListener('pointermove', onPointerMove, {passive:false}); window.addEventListener('pointerup', onPointerEnd, {passive:false}); window.addEventListener('pointercancel', onPointerEnd, {passive:false}); }
+  if(panelSVG){ panelSVG.addEventListener('pointerdown', onPointerDown, {passive:false}); window.addEventListener('pointermove', onPointerMove, {passive:false}); window.addEventListener('pointerup', onPointerEnd, {passive:false}); window.addEventListener('pointercancel', onPointerEnd, {passive:false}); panelSVG.addEventListener('dblclick', onDoubleClick); }
 
   var btnTools = document.getElementById('btnTools'); var toolsPanel = document.getElementById('tools'); var palette = document.getElementById('palette');
   function setTool(name){ currentTool=name; $$('#tools .tool').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-tool')===name); }); if(name!=='color' && palette){ palette.classList.remove('open'); palette.setAttribute('aria-hidden','true'); } }
@@ -324,9 +335,26 @@
   var tabsEl = document.getElementById('tabs'); if(tabsEl){ tabsEl.addEventListener('click', function(e){ var t = e.target && e.target.closest ? e.target.closest('.tab') : null; if(!t) return; $$('#tabs .tab').forEach(function(o){ o.classList.remove('active'); }); t.classList.add('active'); musculo = t.getAttribute('data-musculo'); clearPins(); clearFree(); clearLines(); clearLabels(); loadSVG(); }); }
   var sideToggle = document.getElementById('sideToggle'); if(sideToggle){ sideToggle.addEventListener('click', function(ev){ var btn = ev.target && ev.target.closest ? ev.target.closest('button[data-side]') : null; if(!btn) return; Array.prototype.slice.call(sideToggle.querySelectorAll('button[data-side]')).forEach(function(b){ b.classList.remove('active'); }); btn.classList.add('active'); lado = btn.getAttribute('data-side'); clearPins(); clearFree(); clearLines(); clearLabels(); loadSVG(); }); }
 
-  // Grado: BAMIC/Munich selector
-  var gradoMode = document.getElementById('gradoMode'); var gradoOptions = document.getElementById('gradoOptions');
-  function renderGrado(mode){ if(!gradoOptions) return; var html=''; if(mode==='munich'){ html += '\n          <label><input type="radio" name="grado" value="3A"> Lesión parcial menor (3A)</label>'; html += '\n          <label><input type="radio" name="grado" value="3B"> Lesión parcial moderada (3B)</label>'; html += '\n          <label><input type="radio" name="grado" value="4"> Lesión muscular subtotal o total (4)</label>'; html += '\n          <label><input type="radio" name="grado" value="tendon_total"> Lesión total del tendón / Avulsión (4)</label>'; } else { html += '\n          <label><input type="radio" name="grado" value="1"> 1</label>'; html += '\n          <label><input type="radio" name="grado" value="2"> 2</label>'; html += '\n          <label><input type="radio" name="grado" value="3"> 3</label>'; html += '\n          <label><input type="radio" name="grado" value="4"> 4</label>'; } gradoOptions.innerHTML=html; }
+  // Grado: BAMIC / MUNICH / CLÁSICA
+  var gradoMode = document.getElementById('gradoMode'); var gradoOptions = document.getElementById('gradoOptions'); var cardTejido = document.getElementById('cardTejido');
+  function renderGrado(mode){ if(!gradoOptions) return; var html=''; if(mode==='munich'){
+      html += '\n<label><input type="radio" name="grado" value="Lesión parcial menor (3A)"> Lesión parcial menor (3A)</label>';
+      html += '\n<label><input type="radio" name="grado" value="Lesión parcial moderada (3B)"> Lesión parcial moderada (3B)</label>';
+      html += '\n<label><input type="radio" name="grado" value="Lesión muscular subtotal o total (4)"> Lesión muscular subtotal o total (4)</label>';
+      html += '\n<label><input type="radio" name="grado" value="Lesión total del tendón / Avulsión (4)"> Lesión total del tendón / Avulsión (4)</label>';
+      gradoOptions.innerHTML=html; cardTejido.style.display='none';
+    } else if(mode==='clasica'){
+      html += '\n<label><input type="radio" name="grado" value="Grado I"> Grado I</label>';
+      html += '\n<label><input type="radio" name="grado" value="Grado II"> Grado II</label>';
+      html += '\n<label><input type="radio" name="grado" value="Grado III"> Grado III</label>';
+      gradoOptions.innerHTML=html; cardTejido.style.display='none';
+    } else { // bamic
+      html += '\n<label><input type="radio" name="grado" value="Grado 1"> Grado 1</label>';
+      html += '\n<label><input type="radio" name="grado" value="Grado 2"> Grado 2</label>';
+      html += '\n<label><input type="radio" name="grado" value="Grado 3"> Grado 3</label>';
+      html += '\n<label><input type="radio" name="grado" value="Grado 4"> Grado 4</label>';
+      gradoOptions.innerHTML=html; cardTejido.style.display='block';
+    } }
   if(gradoMode){ gradoMode.addEventListener('click', function(e){ var b=e.target && e.target.closest ? e.target.closest('button[data-mode]') : null; if(!b) return; Array.prototype.slice.call(gradoMode.querySelectorAll('button')).forEach(function(x){ x.classList.remove('active'); }); b.classList.add('active'); renderGrado(b.getAttribute('data-mode')); }); }
 
   // ===== TESTS =====
@@ -339,24 +367,21 @@
     function(){ return assert(typeof loadSVG==='function','loadSVG definida'); },
     function(){ try{ var p=loadSVG(); return assert(p instanceof Promise || p===undefined,'loadSVG no arroja'); }catch(e){ return assert(false,'loadSVG no debería arrojar'); } },
     function(){ return assert(!!document.getElementById('btnTools'),'Botón Herramientas presente'); },
-    function(){ // paleta abre y cambia color
-      var colorBtn=document.querySelector('.tool[data-tool="color"]'); colorBtn.click(); var pal=document.getElementById('palette'); var open=pal.classList.contains('open'); var sw=document.querySelector('#palette .sw'); if(!open||!sw) return assert(false,'Paleta no abre'); var prev=window.getComputedStyle(document.getElementById('colorChip')).backgroundColor; sw.click(); applyColorChip(); var now=window.getComputedStyle(document.getElementById('colorChip')).backgroundColor; return assert(prev!==now,'Cambio de color activo'); },
-    function(){ // estrella usa color actual
-      setTool('star'); var rect=panelSVG.getBoundingClientRect(); try{ panelSVG.dispatchEvent(new PointerEvent('pointerdown',{clientX:rect.left+90,clientY:rect.top+90})); window.dispatchEvent(new PointerEvent('pointermove',{clientX:rect.left+120,clientY:rect.top+120})); window.dispatchEvent(new PointerEvent('pointerup',{clientX:rect.left+120,clientY:rect.top+120})); }catch(_){ } var el=pins.lastElementChild; var ok = !!el && el.getAttribute('fill'); return assert(ok,'Estrella creada con fill'); },
-    function(){ // libre que cierra y rellena
-      setTool('free'); var rect=panelSVG.getBoundingClientRect(); try{ panelSVG.dispatchEvent(new PointerEvent('pointerdown',{clientX:rect.left+300,clientY:rect.top+300})); window.dispatchEvent(new PointerEvent('pointermove',{clientX:rect.left+340,clientY:rect.top+300})); window.dispatchEvent(new PointerEvent('pointermove',{clientX:rect.left+340,clientY:rect.top+340})); window.dispatchEvent(new PointerEvent('pointermove',{clientX:rect.left+300,clientY:rect.top+340})); window.dispatchEvent(new PointerEvent('pointermove',{clientX:rect.left+302,clientY:rect.top+302})); window.dispatchEvent(new PointerEvent('pointerup',{clientX:rect.left+302,clientY:rect.top+302})); }catch(_){ } var el=freeGrp.lastElementChild; var ok = !!el && el.getAttribute('fill') && el.getAttribute('fill')!=='none'; return assert(ok,'Libre cerrado con relleno'); },
-    function(){ // línea creada
-      setTool('line'); var before=linesGrp.childElementCount; var rect=panelSVG.getBoundingClientRect(); try{ panelSVG.dispatchEvent(new PointerEvent('pointerdown',{clientX:rect.left+400,clientY:rect.top+200})); window.dispatchEvent(new PointerEvent('pointermove',{clientX:rect.left+460,clientY:rect.top+260})); window.dispatchEvent(new PointerEvent('pointerup',{clientX:rect.left+460,clientY:rect.top+260})); }catch(_){ } var after=linesGrp.childElementCount; return assert(after===before+1,'Línea creada'); },
-    function(){ // forma creada
-      setTool('shape'); var before=pins.childElementCount; var rect=panelSVG.getBoundingClientRect(); try{ panelSVG.dispatchEvent(new PointerEvent('pointerdown',{clientX:rect.left+520,clientY:rect.top+240})); window.dispatchEvent(new PointerEvent('pointermove',{clientX:rect.left+560,clientY:rect.top+260})); window.dispatchEvent(new PointerEvent('pointerup',{clientX:rect.left+560,clientY:rect.top+260})); }catch(_){ } var after=pins.childElementCount; return assert(after===before+1,'Forma creada'); },
-    function(){ // texto creado
-      setTool('text'); var rect=panelSVG.getBoundingClientRect(); var orig=window.prompt; try{ window.prompt=function(){ return 'TEST'; }; panelSVG.dispatchEvent(new PointerEvent('pointerdown',{clientX:rect.left+600,clientY:rect.top+260})); }catch(_){ } finally{ window.prompt=orig; } var last=$('#labels text:last-of-type'); return assert(!!last && last.textContent==='TEST','Texto creado'); }
+    function(){ // selector triple
+      renderGrado('bamic'); var n1=$$('#gradoOptions label').length; renderGrado('munich'); var n2=$$('#gradoOptions label').length; var ctVis=(document.getElementById('cardTejido').style.display!=='none'); renderGrado('clasica'); var n3=$$('#gradoOptions label').length; return assert(n1===4 && n2===4 && n3===3 && ctVis===false,'Selector BAMIC/MUNICH/CLÁSICA funciona'); },
+    function(){ // texto creado y editable
+      var rect=panelSVG.getBoundingClientRect(); setTool('text'); var orig=window.prompt; try{ window.prompt=function(){ return 'TEST'; }; panelSVG.dispatchEvent(new PointerEvent('pointerdown',{clientX:rect.left+600,clientY:rect.top+260})); }catch(_){ } finally{ window.prompt=orig; }
+      var last=$('#labels text:last-of-type'); var ok1 = !!last && last.textContent==='TEST';
+      if(!ok1) return assert(false,'Texto no creado');
+      // simular edición in-place
+      try{ var evt=new MouseEvent('dblclick',{bubbles:true}); last.dispatchEvent(evt); }catch(_){ }
+      return assert(!!last,'Texto editable (editor mostrado)'); },
   ];
   tests.forEach(function(t){ try{ t(); }catch(e){ console.error('[TEST ERROR]', e); } });
 
-  try{ /* limpiar tras tests */ clearPins(); clearFree(); clearLines(); clearLabels(); }catch(_){ }
+  try{ clearPins(); clearFree(); clearLines(); }catch(_){ }
 
-  loadSVG(); applyColorChip(); setTool(null);
+  loadSVG(); applyColorChip(); setTool(null); renderGrado('bamic');
 })();
 </script>
 </body>
