@@ -92,6 +92,30 @@
 
   /* Editor inline del texto (input overlay) */
   .text-editor{position:fixed;z-index:9999;padding:.2rem .35rem;border:1px solid #6b7890;border-radius:.35rem;background:#fff;color:#111;min-width:40px;font:400 18px system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+/* === Estilo del rectángulo de selección y manijas === */
+.sel-box {
+  fill: none;
+  stroke: white;
+  stroke-width: 1.5;
+  stroke-dasharray: 5 3;
+  pointer-events: none;
+}
+
+.handle {
+  fill: white;
+  stroke: none;
+  width: 8px;
+  height: 8px;
+  pointer-events: all;
+  cursor: pointer;
+}
+
+.handle.rotate {
+  fill: #FFD600; /* amarillo */
+  stroke: none;
+  r: 6;
+}
+
 </style>
 </head>
 <body>
