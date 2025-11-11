@@ -348,14 +348,68 @@
 
   function svgPointXY(e){ return svgPoint(e.clientX, e.clientY); }
 
-  function drawHandles(){ if(!overlay) return; overlay.innerHTML=''; if(!selected) return; var bb = selected.getBBox(); var x=bb.x, y=bb.y, w=bb.width, h=bb.height; var cx=x+w/2, cy=y+h/2; var r=6;
-    var rect = document.createElementNS('http://www.w3.org/2000/svg','rect'); rect.setAttribute('class','sel-box'); rect.setAttribute('x',x); rect.setAttribute('y',y); rect.setAttribute('width',w); rect.setAttribute('height',h); overlay.appendChild(rect);
-    var corners=[["nw",x,y],["ne",x+w,y],["sw",x,y+h],["se",x+w,y+h]]; var sides=[["n",cx,y],["s",cx,y+h],["w",x,cy],["e",x+w,cy]];
-    function addHandle(cls, hx, hy){ var hnd = document.createElementNS('http://www.w3.org/2000/svg','rect'); hnd.setAttribute('class','handle '+cls); hnd.setAttribute('x', hx-r); hnd.setAttribute('y', hy-r); hnd.setAttribute('width', r*2); hnd.setAttribute('height', r*2); hnd.setAttribute('data-action', cls.indexOf('rotate')>=0? 'rotate' : (cls)); overlay.appendChild(hnd); }
-    for(var i=0;i<corners.length;i++){ addHandle(corners[i][0], corners[i][1], corners[i][2]); }
-    for(var j=0;j<sides.length;j++){ addHandle(sides[j][0], sides[j][1], sides[j][2]); }
-    var rotY = y - 26; var rot = document.createElementNS('http://www.w3.org/2000/svg','circle'); rot.setAttribute('class','handle rotate'); rot.setAttribute('cx', cx); rot.setAttribute('cy', rotY); rot.setAttribute('r', 6); rot.setAttribute('data-action','rotate'); overlay.appendChild(rot);
+  function drawHandles(){
+  if(!overlay) return;
+  overlay.innerHTML = '';
+  if(!selected) return;
+
+  // Caja base del elemento seleccionado (en coordenadas sin transformar)
+  var bb = selected.getBBox();
+  var x = bb.x, y = bb.y, w = bb.width, h = bb.height;
+  var cx = x + w/2, cy = y + h/2;
+
+  // Manijas más pequeñas
+  var r = 4; // antes 6
+
+  // Copiamos la transform actual del elemento seleccionado
+  var t = selected.getAttribute('transform') || '';
+
+  // Rectángulo de selección (transparente + borde punteado vía CSS .sel-box)
+  var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+  rect.setAttribute('class','sel-box');
+  rect.setAttribute('x', x);
+  rect.setAttribute('y', y);
+  rect.setAttribute('width',  w);
+  rect.setAttribute('height', h);
+  rect.setAttribute('transform', t); // << clave: se transforma junto al dibujo
+  overlay.appendChild(rect);
+
+  // Esquinas y lados para handles
+  var corners = [["nw",x,y],["ne",x+w,y],["sw",x,y+h],["se",x+w,y+h]];
+  var sides   = [["n",cx,y],["s",cx,y+h],["w",x,cy],["e",x+w,cy]];
+
+  function addHandle(cls, hx, hy){
+    var hnd = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    hnd.setAttribute('class','handle ' + cls);
+    hnd.setAttribute('x', hx - r);
+    hnd.setAttribute('y', hy - r);
+    hnd.setAttribute('width',  r*2);   // 8px
+    hnd.setAttribute('height', r*2);   // 8px
+    hnd.setAttribute('data-action', cls.indexOf('rotate') >= 0 ? 'rotate' : cls);
+    hnd.setAttribute('transform', t);  // << clave
+    overlay.appendChild(hnd);
   }
+
+  // Manijas de esquinas
+  for(var i=0;i<corners.length;i++){
+    addHandle(corners[i][0], corners[i][1], corners[i][2]);
+  }
+  // Manijas de lados
+  for(var j=0;j<sides.length;j++){
+    addHandle(sides[j][0], sides[j][1], sides[j][2]);
+  }
+
+  // Manija de rotación (círculo) — amarilla vía .handle.rotate
+  var rotY = y - 26; // offset vertical respecto de la caja
+  var rot = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  rot.setAttribute('class','handle rotate');
+  rot.setAttribute('cx', cx);
+  rot.setAttribute('cy', rotY);
+  rot.setAttribute('r', 5);            // antes 6, ahora un poco más chico
+  rot.setAttribute('data-action','rotate');
+  rot.setAttribute('transform', t);    // << clave
+  overlay.appendChild(rot);
+}
 
   function beginMoveSelection(e){ if(!selected) return; transforming=true; transformMode='move'; var p=svgPointXY(e); var d=getData(selected); var bb=selected.getBBox(); transformInit={cx:bb.x+bb.width/2, cy:bb.y+bb.height/2, tx:d.tx, ty:d.ty, sx:d.sx, sy:d.sy, rot:d.rot, mouse:p}; }
 
