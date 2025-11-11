@@ -349,68 +349,87 @@
 
   function svgPointXY(e){ return svgPoint(e.clientX, e.clientY); }
 
-  function drawHandles(){
+function drawHandles(){
   if(!overlay) return;
   overlay.innerHTML = '';
   if(!selected) return;
 
-  // Caja base del elemento seleccionado (en coordenadas sin transformar)
+  // Datos y caja sin transformar
   var bb = selected.getBBox();
   var x = bb.x, y = bb.y, w = bb.width, h = bb.height;
   var cx = x + w/2, cy = y + h/2;
 
-  // Manijas más pequeñas
-  var r = 4; // antes 6
+  // Transforms propios del elemento
+  var d = getData(selected);
+  var sx = d.sx, sy = d.sy, rot = d.rot, tx = d.tx, ty = d.ty;
 
-  // Copiamos la transform actual del elemento seleccionado
-  var t = selected.getAttribute('transform') || '';
+  // Grupo base: sólo traslada y rota (NO escala) todo el overlay
+  var root = document.createElementNS('http://www.w3.org/2000/svg','g');
+  var TR = 'translate('+tx+' '+ty+') translate('+cx+' '+cy+') rotate('+rot+') translate('+-cx+' '+-cy+')';
+  root.setAttribute('transform', TR);
+  overlay.appendChild(root);
 
-  // Rectángulo de selección (transparente + borde punteado vía CSS .sel-box)
+  // Rectángulo de selección: se escala para coincidir con el objeto
   var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
   rect.setAttribute('class','sel-box');
   rect.setAttribute('x', x);
   rect.setAttribute('y', y);
   rect.setAttribute('width',  w);
   rect.setAttribute('height', h);
-  rect.setAttribute('transform', t); // << clave: se transforma junto al dibujo
-  overlay.appendChild(rect);
+  rect.setAttribute('transform', 'scale('+sx+' '+sy+')'); // coincide con el dibujo
+  root.appendChild(rect);
 
-  // Esquinas y lados para handles
-  var corners = [["nw",x,y],["ne",x+w,y],["sw",x,y+h],["se",x+w,y+h]];
-  var sides   = [["n",cx,y],["s",cx,y+h],["w",x,cy],["e",x+w,cy]];
+  // Manijas con tamaño fijo (no escalan): calculamos posiciones ya escaladas
+  function scalePoint(px, py){
+    return {
+      x: cx + (px - cx) * sx,
+      y: cy + (py - cy) * sy
+    };
+  }
+
+  var cornersSrc = [[x,y],[x+w,y],[x,y+h],[x+w,y+h]];
+  var sidesSrc   = [[cx,y],[cx,y+h],[x,cy],[x+w,cy]]; // n,s,w,e
+
+  var r = 4; // radio visual de las clavijas (8x8)
 
   function addHandle(cls, hx, hy){
     var hnd = document.createElementNS('http://www.w3.org/2000/svg','rect');
-    hnd.setAttribute('class','handle ' + cls);
+    hnd.setAttribute('class','handle '+cls);
     hnd.setAttribute('x', hx - r);
     hnd.setAttribute('y', hy - r);
-    hnd.setAttribute('width',  r*2);   // 8px
-    hnd.setAttribute('height', r*2);   // 8px
-    hnd.setAttribute('data-action', cls.indexOf('rotate') >= 0 ? 'rotate' : cls);
-    hnd.setAttribute('transform', t);  // << clave
-    overlay.appendChild(hnd);
+    hnd.setAttribute('width',  r*2);
+    hnd.setAttribute('height', r*2);
+    hnd.setAttribute('data-action', cls);
+    root.appendChild(hnd); // bajo root (rot/trasl), sin scale ⇒ tamaño fijo
   }
 
-  // Manijas de esquinas
-  for(var i=0;i<corners.length;i++){
-    addHandle(corners[i][0], corners[i][1], corners[i][2]);
-  }
-  // Manijas de lados
-  for(var j=0;j<sides.length;j++){
-    addHandle(sides[j][0], sides[j][1], sides[j][2]);
+  // Esquinas (nw, ne, sw, se)
+  var cNames = ['nw','ne','sw','se'];
+  for(var i=0;i<cornersSrc.length;i++){
+    var p = scalePoint(cornersSrc[i][0], cornersSrc[i][1]);
+    addHandle(cNames[i], p.x, p.y);
   }
 
-  // Manija de rotación (círculo) — amarilla vía .handle.rotate
-  var rotY = y - 26; // offset vertical respecto de la caja
+  // Lados (n, s, w, e)
+  var sNames = ['n','s','w','e'];
+  for(var j=0;j<sidesSrc.length;j++){
+    var q = scalePoint(sidesSrc[j][0], sidesSrc[j][1]);
+    addHandle(sNames[j], q.x, q.y);
+  }
+
+  // Manija de rotación: offset fijo en px, alineada al centro superior
+  var topScaled = scalePoint(cx, y);           // borde superior ya escalado
+  var rotOffset = 26;                          // distancia fija en px
+  var rotY = topScaled.y - rotOffset;          // por encima del borde
   var rot = document.createElementNS('http://www.w3.org/2000/svg','circle');
   rot.setAttribute('class','handle rotate');
-  rot.setAttribute('cx', cx);
+  rot.setAttribute('cx', topScaled.x);
   rot.setAttribute('cy', rotY);
-  rot.setAttribute('r', 5);            // antes 6, ahora un poco más chico
+  rot.setAttribute('r', 5);
   rot.setAttribute('data-action','rotate');
-  rot.setAttribute('transform', t);    // << clave
-  overlay.appendChild(rot);
+  root.appendChild(rot);
 }
+
 
   function beginMoveSelection(e){ if(!selected) return; transforming=true; transformMode='move'; var p=svgPointXY(e); var d=getData(selected); var bb=selected.getBBox(); transformInit={cx:bb.x+bb.width/2, cy:bb.y+bb.height/2, tx:d.tx, ty:d.ty, sx:d.sx, sy:d.sy, rot:d.rot, mouse:p}; }
 
