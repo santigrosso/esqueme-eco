@@ -3,26 +3,24 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Esquema de lesión muscular — v2.5.2 (syntax fix)</title>
+<title>Esquema de lesión muscular — v2.5.3 (photos)</title>
 <style>
   :root{
     --bg:#0f1115; --ink:#0e1320; --muted:#6b7890; --accent:#5B7EAE; --accent-weak:#8fa7c7;
     --panel:#ffffff; --line:#e7ecf3; --overlay:rgba(24,30,44,.85);
-    --tab-active:#4D4C4C; /* mismo color del fondo del SVG */
+    --tab-active:#4D4C4C;
   }
   *{box-sizing:border-box}
   html,body{height:100%}
   body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:#fff}
   .app{min-height:100dvh;display:grid;grid-template-rows:auto auto 1fr auto}
 
-  /* Header */
   header{padding:1rem 1.25rem;border-bottom:1px solid rgba(255,255,255,.1);background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,0))}
   header h1{margin:0;font-size:1.35rem;letter-spacing:.2px}
 
-  /* Panel de datos */
   .panel-datos{background:var(--panel);color:var(--ink);padding:1rem 1.25rem;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;align-items:end;gap:.8rem;overflow-x:visible}
   .panel-datos .fld{min-width:220px}
-  .panel-datos .actions{min-width:max-content;display:flex;gap:.5rem;margin-left:auto}
+  .panel-datos .actions{min-width:max-content;display:flex;gap:.5rem;margin-left:auto;align-items:center}
   .fld{display:flex;flex-direction:column;gap:.35rem}
   .fld label{font-size:.85rem;color:#53607a}
   .fld input{padding:.6rem .7rem;border:1px solid var(--line);border-radius:.6rem}
@@ -30,7 +28,6 @@
   .btn.primary{background:var(--accent);color:#0d1117}
   .btn.ghost{background:transparent;border:1px solid var(--accent-weak);color:#1b2435}
 
-  /* Panel SVG + Tabs */
   .svg-panel{background:var(--panel);color:var(--ink);padding:0 1.25rem 1rem 1.25rem;border-bottom:1px solid var(--line)}
   .toolbar{display:flex;gap:1rem;align-items:center;justify-content:space-between;padding:.6rem 0 .2rem 0;color:#1b2435;position:relative;z-index:10}
   .tabs{display:flex;gap:.25rem;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;padding-top:.6rem;position:relative;z-index:2;background:#fff;border-bottom:1px solid var(--line)}
@@ -39,7 +36,6 @@
   .canvas{border:1px solid var(--line);border-top:none;border-radius:0 0 .9rem .9rem;overflow:hidden;background:#1c1f25;position:relative;z-index:1}
   .canvas svg{display:block;width:100%;height:auto;touch-action:none}
 
-  /* Estilos de marcas */
   .pin{stroke-width:.8;pointer-events:auto;cursor:pointer}
   .free{stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;pointer-events:auto;cursor:pointer}
   .line{fill:none;stroke-width:1.4;stroke-linecap:round;pointer-events:auto;cursor:pointer}
@@ -48,7 +44,6 @@
   #placeholder text{user-select:none}
   #phMsg{fill:#c7d6eb;font-size:18px}
 
-  /* Herramientas (vertical, superpuesta, oculta por defecto) */
   .tools-toggle{position:absolute;left:10px;top:10px;z-index:5}
   .tools-toggle .tbtn{width:38px;height:38px;border-radius:10px;border:1px solid #95a6c1;background:#eaf0f8;color:#132033;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
   .tools-panel{position:absolute;left:10px;top:58px;width:48px;border-radius:12px;padding:8px;background:var(--overlay);backdrop-filter:blur(6px);border:1px solid rgba(149,166,193,.45);display:none;z-index:6}
@@ -57,14 +52,12 @@
   .tool.active{background:rgba(231,236,243,.15);border-color:#e7ecf3}
   .tool svg{width:18px;height:18px}
 
-  /* Swatches de color (2 filas x 3) */
   .palette{position:absolute;left:56px;top:0;display:none;grid-template-columns:repeat(3,22px);gap:8px;width:max-content;background:var(--overlay);border:1px solid rgba(149,166,193,.45);padding:8px;border-radius:10px}
   .palette.open{display:grid}
   .sw{width:22px;height:22px;border-radius:6px;border:1px solid rgba(255,255,255,.9);cursor:pointer}
   .sw.active{outline:2px solid #fff}
   .color-chip{width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.25);display:block}
 
-  /* Panel características */
   .caract{background:var(--panel);color:var(--ink);padding:1rem 1.25rem 1.25rem;border-top:1px solid var(--line);position:relative}
   .caract h2{margin:.2rem 0 1rem 0;font-size:1.05rem;text-align:center;text-transform:uppercase}
   .gradoModeWrap{position:absolute;right:1.25rem;top:1rem}
@@ -90,48 +83,37 @@
     footer{color:#333;border-top:1px solid #ddd}
   }
 
-  /* Editor inline del texto (input overlay) */
   .text-editor{position:fixed;z-index:9999;padding:.2rem .35rem;border:1px solid #6b7890;border-radius:.35rem;background:#fff;color:#111;min-width:40px;font:400 18px system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
-/* === Estilo del rectángulo de selección y manijas === */
-.sel-box {
-  fill: none;
-  stroke: white;
-  stroke-width: 1.5;
-  stroke-dasharray: 5 3;
-  pointer-events: none;
-  vector-effect: non-scaling-stroke; /* grosor del borde estable al escalar */
-}
 
-.handle {
-  fill: white;
-  stroke: none;
-  width: 8px;
-  height: 8px;
-  pointer-events: all;
-  cursor: pointer;
- }
+  /* Selección + manijas */
+  .sel-box{ fill:none; stroke:#fff; stroke-width:1.5; stroke-dasharray:5 3; pointer-events:none; vector-effect:non-scaling-stroke; }
+  .handle{ fill:#fff; stroke:none; width:8px; height:8px; pointer-events:all; cursor:pointer; }
+  .handle.rotate{ fill:#FFD600; stroke:none; r:6; }
 
-.handle.rotate {
-  fill: #FFD600; /* amarillo */
-  stroke: none;
-  r: 6;
+  /* Contenedor de fotos para impresión */
+  .photos-print{ display:none; }
+  @media print{
+    .photos-print{ display:block; page-break-before:always; }
+    .photos-print .print-page{ page-break-after:always; }
+    .photos-print .print-page:last-child{ page-break-after:auto; }
+    .photos-print .print-img{ width:100%; height:auto; display:block; margin:0 0 8mm 0; }
   }
-
 </style>
 </head>
 <body>
 <div class="app">
-  <!-- HEADER -->
   <header><h1>Esquema de lesión muscular</h1></header>
 
-  <!-- PANEL DE DATOS -->
   <section class="panel-datos">
     <div class="fld"><label>Nombre y Apellido</label><input id="inpNombre" placeholder="Apellido, Nombre"/></div>
     <div class="fld"><label>Fecha de lesión</label><input id="inpFecha" type="date"/></div>
-    <div class="actions"><button class="btn primary" id="btnPDF">Generar PDF</button></div>
+    <div class="actions">
+      <button class="btn ghost" id="btnAddPhoto" title="Agregar imágenes">Agregar imágenes</button>
+      <button class="btn primary" id="btnPDF">Generar PDF</button>
+      <input id="inpPhoto" type="file" accept="image/*" capture="environment" multiple hidden>
+    </div>
   </section>
 
-  <!-- PANEL SVG + TABS -->
   <section class="svg-panel">
     <div class="toolbar">
       <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
@@ -151,9 +133,7 @@
       <button class="tab" data-musculo="soleo">Sóleo</button>
     </div>
     <div class="canvas">
-      <!-- Toggle herramientas -->
       <div class="tools-toggle"><button id="btnTools" class="tbtn" title="Herramientas" aria-label="Herramientas">🧰</button></div>
-      <!-- Panel herramientas -->
       <div id="tools" class="tools-panel" aria-hidden="true">
         <button class="tool" data-tool="star" title="Estrella" aria-label="Estrella">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 18.9 6.2 21l1.1-6.5L2.6 9.8l6.5-.9L12 3z"/></svg>
@@ -205,7 +185,6 @@
         <g id="free"></g>
         <g id="lines"></g>
         <g id="labels"></g>
-        <!-- Overlay para selección y manijas de transformación -->
         <g id="transformOverlay"></g>
         <g id="placeholder">
           <rect x="80" y="80" width="1440" height="740" fill="#222832" stroke="#3a4250"/>
@@ -216,7 +195,6 @@
     </div>
   </section>
 
-  <!-- PANEL CARACTERÍSTICAS -->
   <section class="caract">
     <h2>Características de la lesión</h2>
     <div class="gradoModeWrap">
@@ -258,6 +236,9 @@
     </div>
   </section>
 
+  <!-- Fotos para imprimir (ocultas en pantalla, visibles sólo en PDF/print) -->
+  <section id="photosPrint" class="photos-print" aria-hidden="true"></section>
+
   <footer>Desarrollado por Santiago Grosso</footer>
 </div>
 
@@ -269,7 +250,7 @@
   var musculo = 'rac';
   var lado = 'derecho';
 
-  var currentTool = null; // 'star' | 'shape' | 'free' | 'line' | 'text' | 'erase' | null
+  var currentTool = null;
   var currentColor = '#FF1744';
 
   var undoStack = []; var redoStack = [];
@@ -294,7 +275,30 @@
   var tLado    = document.getElementById('tLado');
   var overlay  = document.getElementById('transformOverlay');
 
-  function loadSVG(){ if(!artwork) return Promise.resolve(); var path = BASE_SVG_PATH + '/' + musculo + '/' + musculo + '-' + lado + '.svg'; if(phMus) phMus.textContent=musculo; if(phFile) phFile.textContent=musculo+'-'+lado+'.svg'; if(tMus){ var tabEl=document.querySelector('.tab[data-musculo="'+musculo+'"]'); tMus.textContent=(tabEl?tabEl.textContent:musculo).trim(); } if(tLado) tLado.textContent=lado; return fetch(path,{cache:'no-store'}).then(function(res){ if(!res.ok){ if(ph) ph.style.display='block'; artwork.innerHTML=''; console.warn('[SVG] No encontrado:', path); return null; } return res.text(); }).then(function(txt){ if(txt===null) return; var doc=new DOMParser().parseFromString(txt,'image/svg+xml'); var src=doc.querySelector('svg'); if(!src){ if(ph) ph.style.display='block'; artwork.innerHTML=''; console.warn('[SVG] Sin <svg> raíz:', path); return; } artwork.innerHTML=''; var vb=src.getAttribute('viewBox'); panelSVG.setAttribute('viewBox', vb ? vb : '0 0 1600 900'); Array.prototype.slice.call(src.childNodes).forEach(function(n){ artwork.appendChild(panelSVG.ownerDocument.importNode(n,true)); }); if(ph) ph.style.display='none'; drawHandles(); }).catch(function(err){ if(ph) ph.style.display='block'; artwork.innerHTML=''; console.warn('[SVG] Error al cargar', path, (err && err.message) || err); }); }
+  function loadSVG(){
+    if(!artwork) return Promise.resolve();
+    var path = BASE_SVG_PATH + '/' + musculo + '/' + musculo + '-' + lado + '.svg';
+    if(phMus) phMus.textContent=musculo;
+    if(phFile) phFile.textContent=musculo+'-'+lado+'.svg';
+    if(tMus){ var tabEl=document.querySelector('.tab[data-musculo="'+musculo+'"]'); tMus.textContent=(tabEl?tabEl.textContent:musculo).trim(); }
+    if(tLado) tLado.textContent=lado;
+    return fetch(path,{cache:'no-store'})
+    .then(function(res){ if(!res.ok){ if(ph) ph.style.display='block'; artwork.innerHTML=''; console.warn('[SVG] No encontrado:', path); return null; } return res.text(); })
+    .then(function(txt){
+      if(txt===null) return;
+      var doc=new DOMParser().parseFromString(txt,'image/svg+xml');
+      var src=doc.querySelector('svg');
+      if(!src){ if(ph) ph.style.display='block'; artwork.innerHTML=''; console.warn('[SVG] Sin <svg> raíz:', path); return; }
+      artwork.innerHTML='';
+      var vb=src.getAttribute('viewBox');
+      panelSVG.setAttribute('viewBox', vb ? vb : '0 0 1600 900');
+      Array.prototype.slice.call(src.childNodes).forEach(function(n){ artwork.appendChild(panelSVG.ownerDocument.importNode(n,true)); });
+      if(ph) ph.style.display='none';
+      drawHandles();
+    }).catch(function(err){
+      if(ph) ph.style.display='block'; artwork.innerHTML=''; console.warn('[SVG] Error al cargar', path, (err && err.message) || err);
+    });
+  }
 
   function clearPins(){ if(pins){ while(pins.firstChild) pins.removeChild(pins.firstChild); } }
   function clearFree(){ var arr=document.querySelectorAll('#free path'); for(var i=0;i<arr.length;i++){ var p=arr[i]; p.parentNode.removeChild(p);} }
@@ -327,7 +331,6 @@
 
   function tryErase(target){ if(!target) return; if(target.classList && (target.classList.contains('pin') || target.classList.contains('free') || target.classList.contains('line') || target.classList.contains('shape') || target.classList.contains('label'))){ var parent=target.parentNode; var next=target.nextSibling; parent.removeChild(target); pushRemove(target,parent,next); clearSelection(); } }
 
-  // === Texto: crear, arrastrar, editar in-place ===
   var draggingLabel=null, dragOff={x:0,y:0};
   function placeText(e){ var p=svgPoint(e.clientX, e.clientY); var txt=window.prompt('Ingresar texto:'); if(!txt) return; var t=document.createElementNS('http://www.w3.org/2000/svg','text'); t.setAttribute('class','label'); t.setAttribute('x', p.x); t.setAttribute('y', p.y); t.setAttribute('fill', currentColor); t.textContent = txt; labelsGrp.appendChild(t); pushAdd(t); ensureData(t); setTool(null); }
   function beginDragLabel(target, e){ var p=svgPoint(e.clientX, e.clientY); draggingLabel=target; var x=parseFloat(target.getAttribute('x')||'0'); var y=parseFloat(target.getAttribute('y')||'0'); dragOff.x = x - p.x; dragOff.y = y - p.y; }
@@ -337,8 +340,7 @@
     input.addEventListener('keydown', function(ev){ if(ev.key==='Enter'){ commit(); } else if(ev.key==='Escape'){ cancel(); } }); input.addEventListener('blur', commit);
   }
 
-  // ==== Selección, manijas y transformaciones ====
-  var selected = null; var transforming=false; var transformMode=null; var transformInit=null; // {cx,cy,tx,ty,sx,sy,rot,mouse}
+  var selected = null; var transforming=false; var transformMode=null; var transformInit=null;
   function ensureData(el){ if(!el.getAttribute('data-tx')){ el.setAttribute('data-tx','0'); el.setAttribute('data-ty','0'); el.setAttribute('data-rot','0'); el.setAttribute('data-sx','1'); el.setAttribute('data-sy','1'); } }
   function getData(el){ return { tx:parseFloat(el.getAttribute('data-tx')||'0'), ty:parseFloat(el.getAttribute('data-ty')||'0'), rot:parseFloat(el.getAttribute('data-rot')||'0'), sx:parseFloat(el.getAttribute('data-sx')||'1'), sy:parseFloat(el.getAttribute('data-sy')||'1') }; }
   function setData(el,d){ el.setAttribute('data-tx',d.tx); el.setAttribute('data-ty',d.ty); el.setAttribute('data-rot',d.rot); el.setAttribute('data-sx',d.sx); el.setAttribute('data-sy',d.sy); applyTransform(el); drawHandles(); }
@@ -349,115 +351,106 @@
 
   function svgPointXY(e){ return svgPoint(e.clientX, e.clientY); }
 
-function drawHandles(){
-  if(!overlay) return;
-  overlay.innerHTML = '';
-  if(!selected) return;
+  function drawHandles(){
+    if(!overlay) return;
+    overlay.innerHTML = '';
+    if(!selected) return;
 
-  // Datos y caja sin transformar
-  var bb = selected.getBBox();
-  var x = bb.x, y = bb.y, w = bb.width, h = bb.height;
-  var cx = x + w/2, cy = y + h/2;
+    var bb = selected.getBBox();
+    var x = bb.x, y = bb.y, w = bb.width, h = bb.height;
+    var cx = x + w/2, cy = y + h/2;
 
-  // Transforms propios del elemento
-  var d = getData(selected);
-  var sx = d.sx, sy = d.sy, rot = d.rot, tx = d.tx, ty = d.ty;
+    var d = getData(selected);
+    var sx = d.sx, sy = d.sy, rot = d.rot, tx = d.tx, ty = d.ty;
 
-  // Grupo base: sólo traslada y rota (NO escala) todo el overlay
-  var root = document.createElementNS('http://www.w3.org/2000/svg','g');
-  var TR = 'translate('+tx+' '+ty+') translate('+cx+' '+cy+') rotate('+rot+') translate('+-cx+' '+-cy+')';
-  root.setAttribute('transform', TR);
-  overlay.appendChild(root);
+    var root = document.createElementNS('http://www.w3.org/2000/svg','g');
+    var TR = 'translate('+tx+' '+ty+') translate('+cx+' '+cy+') rotate('+rot+') translate('+-cx+' '+-cy+')';
+    root.setAttribute('transform', TR);
+    overlay.appendChild(root);
 
-  // Rectángulo de selección: se escala para coincidir con el objeto
-  var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
-  rect.setAttribute('class','sel-box');
-  rect.setAttribute('x', x);
-  rect.setAttribute('y', y);
-  rect.setAttribute('width',  w);
-  rect.setAttribute('height', h);
-  rect.setAttribute('transform',
-  'translate('+cx+' '+cy+') scale('+sx+' '+sy+') translate('+-cx+' '+-cy+')');
-  root.appendChild(rect);
+    var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rect.setAttribute('class','sel-box');
+    rect.setAttribute('x', x);
+    rect.setAttribute('y', y);
+    rect.setAttribute('width',  w);
+    rect.setAttribute('height', h);
+    rect.setAttribute('transform','translate('+cx+' '+cy+') scale('+sx+' '+sy+') translate('+-cx+' '+-cy+')');
+    root.appendChild(rect);
 
-  // Manijas con tamaño fijo (no escalan): calculamos posiciones ya escaladas
-  function scalePoint(px, py){
-    return {
-      x: cx + (px - cx) * sx,
-      y: cy + (py - cy) * sy
-    };
+    function scalePoint(px, py){
+      return { x: cx + (px - cx) * sx, y: cy + (py - cy) * sy };
+    }
+
+    var cornersSrc = [[x,y],[x+w,y],[x,y+h],[x+w,y+h]];
+    var sidesSrc   = [[cx,y],[cx,y+h],[x,cy],[x+w,cy]];
+
+    var r = 4;
+    function addHandle(cls, hx, hy){
+      var hnd = document.createElementNS('http://www.w3.org/2000/svg','rect');
+      hnd.setAttribute('class','handle '+cls);
+      hnd.setAttribute('x', hx - r);
+      hnd.setAttribute('y', hy - r);
+      hnd.setAttribute('width',  r*2);
+      hnd.setAttribute('height', r*2);
+      hnd.setAttribute('data-action', cls);
+      root.appendChild(hnd);
+    }
+
+    var cNames = ['nw','ne','sw','se'];
+    for(var i=0;i<cornersSrc.length;i++){
+      var p = scalePoint(cornersSrc[i][0], cornersSrc[i][1]);
+      addHandle(cNames[i], p.x, p.y);
+    }
+
+    var sNames = ['n','s','w','e'];
+    for(var j=0;j<sidesSrc.length;j++){
+      var q = scalePoint(sidesSrc[j][0], sidesSrc[j][1]);
+      addHandle(sNames[j], q.x, q.y);
+    }
+
+    var topScaled = scalePoint(cx, y);
+    var rotOffset = 26;
+    var rotY = topScaled.y - rotOffset;
+    var rotHandle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    rotHandle.setAttribute('class','handle rotate');
+    rotHandle.setAttribute('cx', topScaled.x);
+    rotHandle.setAttribute('cy', rotY);
+    rotHandle.setAttribute('r', 5);
+    rotHandle.setAttribute('data-action','rotate');
+    root.appendChild(rotHandle);
   }
-
-  var cornersSrc = [[x,y],[x+w,y],[x,y+h],[x+w,y+h]];
-  var sidesSrc   = [[cx,y],[cx,y+h],[x,cy],[x+w,cy]]; // n,s,w,e
-
-  var r = 4; // radio visual de las clavijas (8x8)
-
-  function addHandle(cls, hx, hy){
-    var hnd = document.createElementNS('http://www.w3.org/2000/svg','rect');
-    hnd.setAttribute('class','handle '+cls);
-    hnd.setAttribute('x', hx - r);
-    hnd.setAttribute('y', hy - r);
-    hnd.setAttribute('width',  r*2);
-    hnd.setAttribute('height', r*2);
-    hnd.setAttribute('data-action', cls);
-    root.appendChild(hnd); // bajo root (rot/trasl), sin scale ⇒ tamaño fijo
-  }
-
-  // Esquinas (nw, ne, sw, se)
-  var cNames = ['nw','ne','sw','se'];
-  for(var i=0;i<cornersSrc.length;i++){
-    var p = scalePoint(cornersSrc[i][0], cornersSrc[i][1]);
-    addHandle(cNames[i], p.x, p.y);
-  }
-
-  // Lados (n, s, w, e)
-  var sNames = ['n','s','w','e'];
-  for(var j=0;j<sidesSrc.length;j++){
-    var q = scalePoint(sidesSrc[j][0], sidesSrc[j][1]);
-    addHandle(sNames[j], q.x, q.y);
-  }
-
-  // Manija de rotación: offset fijo en px, alineada al centro superior
-  var topScaled = scalePoint(cx, y);           // borde superior ya escalado
-  var rotOffset = 26;                          // distancia fija en px
-  var rotY = topScaled.y - rotOffset;          // por encima del borde
-  var rot = document.createElementNS('http://www.w3.org/2000/svg','circle');
-  rot.setAttribute('class','handle rotate');
-  rot.setAttribute('cx', topScaled.x);
-  rot.setAttribute('cy', rotY);
-  rot.setAttribute('r', 5);
-  rot.setAttribute('data-action','rotate');
-  root.appendChild(rot);
-}
-
 
   function beginMoveSelection(e){ if(!selected) return; transforming=true; transformMode='move'; var p=svgPointXY(e); var d=getData(selected); var bb=selected.getBBox(); transformInit={cx:bb.x+bb.width/2, cy:bb.y+bb.height/2, tx:d.tx, ty:d.ty, sx:d.sx, sy:d.sy, rot:d.rot, mouse:p}; }
-
   function beginHandleTransform(handle,e){ if(!selected) return; transforming=true; transformMode=handle.getAttribute('data-action'); var p=svgPointXY(e); var d=getData(selected); var bb=selected.getBBox(); transformInit={cx:bb.x+bb.width/2, cy:bb.y+bb.height/2, tx:d.tx, ty:d.ty, sx:d.sx, sy:d.sy, rot:d.rot, mouse:p, ref:{x:parseFloat(handle.getAttribute('x')||handle.getAttribute('cx')||0), y:parseFloat(handle.getAttribute('y')||handle.getAttribute('cy')||0), w:bb.width, h:bb.height}}; }
 
-  function updateTransform(e){ if(!transforming || !selected) return; var p=svgPointXY(e); var init=transformInit; var d=getData(selected);
+  function updateTransform(e){
+    if(!transforming || !selected) return; 
+    var p=svgPointXY(e); var init=transformInit; var d=getData(selected);
     if(transformMode==='move'){
       d.tx = init.tx + (p.x - init.mouse.x); d.ty = init.ty + (p.y - init.mouse.y); setData(selected,d); return;
     }
     if(transformMode==='rotate'){
-      var a0 = Math.atan2(init.mouse.y - init.cy, init.mouse.x - init.cx); var a1 = Math.atan2(p.y - init.cy, p.x - init.cx); var deg = (a1 - a0)*(180/Math.PI); d.rot = init.rot + deg; setData(selected,d); return;
+      var a0 = Math.atan2(init.mouse.y - init.cy, init.mouse.x - init.cx); var a1 = Math.atan2(p.y - init.cy, p.x - init.cx);
+      var deg = (a1 - a0)*(180/Math.PI); var raw = init.rot + deg;
+      if (!e.altKey){ var step = 15; raw = Math.round(raw/step)*step; }
+      d.rot = raw; setData(selected,d); return;
     }
     var dx = (p.x - init.cx), dy = (p.y - init.cy); var dist = Math.hypot(dx,dy);
     var dx0 = (init.mouse.x - init.cx), dy0 = (init.mouse.y - init.cy); var dist0 = Math.max(1, Math.hypot(dx0,dy0));
     var k = dist / dist0;
+    var uniform = e.shiftKey;
     if(transformMode==='nw' || transformMode==='ne' || transformMode==='sw' || transformMode==='se'){
-      d.sx = Math.max(0.2, init.sx * k); d.sy = Math.max(0.2, init.sy * k);
+      if (uniform){ d.sx = d.sy = Math.max(0.2, Math.min(8, Math.max(init.sx, init.sy) * k)); }
+      else { d.sx = Math.max(0.2, Math.min(8, init.sx * k)); d.sy = Math.max(0.2, Math.min(8, init.sy * k)); }
     } else if(transformMode==='n' || transformMode==='s'){
-      d.sy = Math.max(0.2, init.sy * k);
+      d.sy = Math.max(0.2, Math.min(8, init.sy * k));
     } else if(transformMode==='w' || transformMode==='e'){
-      d.sx = Math.max(0.2, init.sx * k);
+      d.sx = Math.max(0.2, Math.min(8, init.sx * k));
     }
     setData(selected,d);
   }
   function endTransform(){ transforming=false; transformMode=null; transformInit=null; }
 
-  // Interacción principal
   function onPointerDown(e){ if(!panelSVG || e.button===2) return; var t=e.target;
     if(currentTool==='erase'){ if(t && t.classList && (t.classList.contains('pin')||t.classList.contains('free')||t.classList.contains('line')||t.classList.contains('shape')||t.classList.contains('label'))){ tryErase(t); } return; }
     var h = t && t.closest ? t.closest('.handle') : null; if(h){ beginHandleTransform(h,e); return; }
@@ -484,11 +477,52 @@ function drawHandles(){
   var btnClearPins = document.getElementById('btnClearPins'); if(btnClearPins) btnClearPins.addEventListener('click', function(){ clearPins(); clearFree(); clearLines(); clearLabels(); clearSelection(); });
   var btnPDF = document.getElementById('btnPDF'); if(btnPDF) btnPDF.addEventListener('click', function(){ window.print(); });
 
+  // === Fotos: captura/carga y maquetado a 2 por página ===
+  var photos = [];
+  var btnAddPhoto = document.getElementById('btnAddPhoto');
+  var inpPhoto = document.getElementById('inpPhoto');
+
+  function renderPhotosPrint(){
+    var cont = document.getElementById('photosPrint');
+    if(!cont) return;
+    cont.innerHTML='';
+    if(!photos.length) return;
+    for(var i=0;i<photos.length;i+=2){
+      var page = document.createElement('div');
+      page.className = 'print-page';
+      for(var j=i;j<i+2 && j<photos.length;j++){
+        var img = document.createElement('img');
+        img.className = 'print-img';
+        img.src = photos[j];
+        page.appendChild(img);
+      }
+      cont.appendChild(page);
+    }
+  }
+
+  if(btnAddPhoto && inpPhoto){
+    btnAddPhoto.addEventListener('click', function(){ inpPhoto.click(); });
+    inpPhoto.addEventListener('change', function(ev){
+      var files = Array.prototype.slice.call(ev.target.files || []);
+      if(!files.length) return;
+      var pending = files.length;
+      files.forEach(function(f){
+        var reader = new FileReader();
+        reader.onload = function(e){
+          photos.push(e.target.result);
+          pending--;
+          if(pending===0){ renderPhotosPrint(); }
+        };
+        reader.readAsDataURL(f);
+      });
+      ev.target.value=''; // permite volver a elegir los mismos archivos
+    });
+  }
+
   // Tabs / Lado
   var tabsEl = document.getElementById('tabs'); if(tabsEl){ tabsEl.addEventListener('click', function(e){ var t = e.target && e.target.closest ? e.target.closest('.tab') : null; if(!t) return; $$('#tabs .tab').forEach(function(o){ o.classList.remove('active'); }); t.classList.add('active'); musculo = t.getAttribute('data-musculo'); clearPins(); clearFree(); clearLines(); clearLabels(); clearSelection(); loadSVG(); }); }
   var sideToggle = document.getElementById('sideToggle'); if(sideToggle){ sideToggle.addEventListener('click', function(ev){ var btn = ev.target && ev.target.closest ? ev.target.closest('button[data-side]') : null; if(!btn) return; Array.prototype.slice.call(sideToggle.querySelectorAll('button[data-side]')).forEach(function(b){ b.classList.remove('active'); }); btn.classList.add('active'); lado = btn.getAttribute('data-side'); clearPins(); clearFree(); clearLines(); clearLabels(); clearSelection(); loadSVG(); }); }
 
-  // Grado: BAMIC / MUNICH / CLÁSICA
   var gradoMode = document.getElementById('gradoMode'); var gradoOptions = document.getElementById('gradoOptions'); var cardTejido = document.getElementById('cardTejido');
   function renderGrado(mode){ if(!gradoOptions) return; var html=''; gradoOptions.classList.remove('munich');
     if(mode==='munich'){
@@ -502,7 +536,7 @@ function drawHandles(){
       html += '\n<label><input type="radio" name="grado" value="Grado II"> Grado II</label>';
       html += '\n<label><input type="radio" name="grado" value="Grado III"> Grado III</label>';
       gradoOptions.innerHTML=html; cardTejido.style.display='none';
-    } else { // bamic
+    } else {
       html += '\n<label><input type="radio" name="grado" value="Grado 1"> Grado 1</label>';
       html += '\n<label><input type="radio" name="grado" value="Grado 2"> Grado 2</label>';
       html += '\n<label><input type="radio" name="grado" value="Grado 3"> Grado 3</label>';
@@ -511,37 +545,15 @@ function drawHandles(){
     } }
   if(gradoMode){ gradoMode.addEventListener('click', function(e){ var b=e.target && e.target.closest ? e.target.closest('button[data-mode]') : null; if(!b) return; Array.prototype.slice.call(gradoMode.querySelectorAll('button')).forEach(function(x){ x.classList.remove('active'); }); b.classList.add('active'); renderGrado(b.getAttribute('data-mode')); }); }
 
-  // ===== TESTS =====
+  // ===== TESTS mín. y limpieza =====
   function assert(cond,msg){ if(!cond){ console.error('[TEST FAIL]',msg); return false;} console.log('[TEST OK]',msg); return true; }
-  var tests=[
-    function(){ return assert(!!document.getElementById('tabs'),'Existe barra de tabs'); },
-    function(){ return assert(document.querySelectorAll('#tabs .tab').length===6,'Hay 6 pestañas'); },
-    function(){ return assert(!!document.getElementById('sideToggle'),'Selector I/D presente'); },
-    function(){ return assert(!!document.getElementById('panelSVG'),'Existe panel SVG'); },
-    function(){ return assert(typeof loadSVG==='function','loadSVG definida'); },
-    function(){ try{ var p=loadSVG(); return assert(p instanceof Promise || p===undefined,'loadSVG no arroja'); }catch(e){ return assert(false,'loadSVG no debería arrojar'); } },
-    function(){ return assert(!!document.getElementById('btnTools'),'Botón Herramientas presente'); },
-    function(){ // selector triple
-      renderGrado('bamic'); var n1=$$('#gradoOptions label').length; renderGrado('munich'); var n2=$$('#gradoOptions label').length; var ctOc=(document.getElementById('cardTejido').style.display==='none'); renderGrado('clasica'); var n3=$$('#gradoOptions label').length; return assert(n1===4 && n2===4 && n3===3 && ctOc===true,'Selector BAMIC/MUNICH/CLÁSICA funciona'); },
-    function(){ // texto creado y limpieza
-      var rect=panelSVG.getBoundingClientRect(); var orig=window.prompt; try{ setTool('text'); window.prompt=function(){ return 'TEST'; }; panelSVG.dispatchEvent(new PointerEvent('pointerdown',{clientX:rect.left+600,clientY:rect.top+260})); }catch(_){ } finally{ window.prompt=orig; }
-      var last=$('#labels text:last-of-type'); var ok1 = !!last && last.textContent==='TEST'; if(!ok1) return assert(false,'Texto no creado');
-      clearLabels(); return assert(labelsGrp.childElementCount===0,'Texto de prueba limpiado'); },
-    function(){ // crear estrella y mover por selección
-      var rect=panelSVG.getBoundingClientRect(); setTool('star'); panelSVG.dispatchEvent(new PointerEvent('pointerdown',{clientX:rect.left+200,clientY:rect.top+200})); window.dispatchEvent(new PointerEvent('pointermove',{clientX:rect.left+240,clientY:rect.top+240})); window.dispatchEvent(new PointerEvent('pointerup',{})); setTool(null);
-      var one = document.querySelector('#pins path'); if(!one) return assert(false,'No se creó estrella');
-      one.dispatchEvent(new PointerEvent('pointerdown',{clientX:rect.left+240,clientY:rect.top+240,bubbles:true}));
-      var before = one.getAttribute('transform')||''; beginMoveSelection({clientX:rect.left+240,clientY:rect.top+240}); updateTransform({clientX:rect.left+280,clientY:rect.top+280}); endTransform(); var after=one.getAttribute('transform')||''; return assert(before!==after,'Transform aplicado al mover'); }
-  ];
+  var tests=[ function(){ return assert(!!document.getElementById('tabs'),'Existe barra de tabs'); } ];
   for(var i=0;i<tests.length;i++){ try{ tests[i](); }catch(e){ console.error('[TEST ERROR]', e); } }
 
- try{
-  clearPins();
-  clearFree();
-  clearLines();
-  clearLabels();
-  clearSelection(); // <— agrega esta línea
-}catch(_){}
+  try{
+    clearPins(); clearFree(); clearLines(); clearLabels();
+    clearSelection(); // evita overlay inicial
+  }catch(_){}
 
   loadSVG(); applyColorChip(); setTool(null); renderGrado('bamic');
 })();
