@@ -534,7 +534,7 @@ function drawHandles(){
   ];
   for(var i=0;i<tests.length;i++){ try{ tests[i](); }catch(e){ console.error('[TEST ERROR]', e); } }
 
-  try{ clearPins(); clearFree(); clearLines(); clearLabels(); }catch(_){ }
+  try{ clearPins(); clearFree(); clearLines(); clearLabels(); clearSelection(); // <— agrega esta línea }catch(_){ }
 
   loadSVG(); applyColorChip(); setTool(null); renderGrado('bamic');
 })();
