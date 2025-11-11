@@ -376,7 +376,8 @@ function drawHandles(){
   rect.setAttribute('y', y);
   rect.setAttribute('width',  w);
   rect.setAttribute('height', h);
-  rect.setAttribute('transform', 'scale('+sx+' '+sy+')'); // coincide con el dibujo
+  rect.setAttribute('transform',
+  'translate('+cx+' '+cy+') scale('+sx+' '+sy+') translate('+-cx+' '+-cy+')');
   root.appendChild(rect);
 
   // Manijas con tamaño fijo (no escalan): calculamos posiciones ya escaladas
