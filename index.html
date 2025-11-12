@@ -488,11 +488,9 @@
   var btnClearPins = document.getElementById('btnClearPins'); if(btnClearPins) btnClearPins.addEventListener('click', function(){ clearPins(); clearFree(); clearLines(); clearLabels(); clearSelection(); });
   var btnPDF = document.getElementById('btnPDF'); if(btnPDF) btnPDF.addEventListener('click', function(){ window.print(); });
 
- // === Fotos: captura/carga y maquetado a 2 por página ===
+ // === Fotos: carga desde galería y maquetado a 2 por página ===
 var photos = [];
 var btnAddPhoto = document.getElementById('btnAddPhoto');
-var photoMenu   = document.getElementById('photoMenu');
-var inpPhotoCam = document.getElementById('inpPhotoCam');
 var inpPhotoGal = document.getElementById('inpPhotoGal');
 
 function renderPhotosPrint(){
@@ -529,51 +527,18 @@ function handleFiles(fileList){
   });
 }
 
-function closePhotoMenu(){ if(photoMenu) photoMenu.style.display='none'; }
-function togglePhotoMenu(){
-  if(!photoMenu) return;
-  photoMenu.style.display = (photoMenu.style.display==='none' || photoMenu.style.display==='') ? 'block' : 'none';
-}
-
-// Abrir menú
+// Click en "Agregar imágenes" = abrir galería directamente
 if(btnAddPhoto){
-  btnAddPhoto.addEventListener('click', function(e){
-    e.stopPropagation();
-    togglePhotoMenu();
+  btnAddPhoto.addEventListener('click', function(){
+    if(inpPhotoGal) inpPhotoGal.click();
   });
-  // Cerrar al click afuera
-  document.addEventListener('click', function(){ closePhotoMenu(); });
-  // Evitar cierre al hacer click dentro del menú
-  if(photoMenu){
-    photoMenu.addEventListener('click', function(e){ e.stopPropagation(); });
-    var optCamera  = document.getElementById('optCamera');
-    var optGallery = document.getElementById('optGallery');
-    if(optCamera){
-      optCamera.addEventListener('click', function(){
-        closePhotoMenu();
-        if(inpPhotoCam) inpPhotoCam.click(); // fuerza cámara
-      });
-    }
-    if(optGallery){
-      optGallery.addEventListener('click', function(){
-        closePhotoMenu();
-        if(inpPhotoGal) inpPhotoGal.click(); // abre galería/archivos
-      });
-    }
-  }
 }
 
-// Carga de archivos
-if(inpPhotoCam){
-  inpPhotoCam.addEventListener('change', function(ev){
-    handleFiles(ev.target.files);
-    ev.target.value=''; // permite re-seleccionar iguales
-  });
-}
+// Cargar archivos seleccionados
 if(inpPhotoGal){
   inpPhotoGal.addEventListener('change', function(ev){
     handleFiles(ev.target.files);
-    ev.target.value='';
+    ev.target.value=''; // permite re-seleccionar los mismos
   });
 }
 
