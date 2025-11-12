@@ -333,7 +333,12 @@ path.setAttribute('d', starPath(p.x,p.y,STAR_MIN)); pins.appendChild(path); push
   function updateStar(e){ if(!drawing) return; var p=svgPoint(e.clientX, e.clientY); var dx=p.x-start.x, dy=p.y-start.y; var r=Math.max(STAR_MIN, Math.min(STAR_MAX, Math.hypot(dx,dy))); drawing.setAttribute('d', starPath(start.x,start.y,r)); }
   function endStar(){ drawing=null; start=null; setTool(null); }
 
-  function startFree(e){ var p=svgPoint(e.clientX, e.clientY); freeStart=p; freeLast=p; freeD='M '+p.x+' '+p.y; freePath=document.createElementNS('http://www.w3.org/2000/svg','path'); freePath.setAttribute('class','free'); freePath.setAttribute('stroke', darken(currentColor,.25)); freePath.setAttribute('stroke-width','1.2'); freePath.setAttribute('fill','none'); freePath.setAttribute('d', freeD); freeGrp.appendChild(freePath); pushAdd(freePath); ensureData(freePath); }
+  function startFree(e){ var p=svgPoint(e.clientX, e.clientY); freeStart=p; freeLast=p; freeD='M '+p.x+' '+p.y; freePath=document.createElementNS('http://www.w3.org/2000/svg','path'); freePath.setAttribute('class','free');
+freePath.setAttribute('stroke', darken(currentColor,.25));
+freePath.setAttribute('stroke-width','1.2');
+freePath.setAttribute('stroke-opacity','1');  // ✅ borde sólido
+freePath.setAttribute('fill','none');         // sin fill mientras está abierto
+ freePath.setAttribute('d', freeD); freeGrp.appendChild(freePath); pushAdd(freePath); ensureData(freePath); }
   function updateFree(e){ if(!freePath) return; var p=svgPoint(e.clientX, e.clientY); freeD += ' L '+p.x+' '+p.y; freePath.setAttribute('d', freeD); freeLast=p; }
   function endFree(e){ if(!freePath) return; var last = freeLast || freeStart; var dist=Math.hypot(last.x-freeStart.x, last.y-freeStart.y); if(dist<24 && freeD.split('L').length>6){ freeD += ' Z'; freePath.setAttribute('d', freeD); freePath.setAttribute('fill', currentColor); freePath.setAttribute('stroke', darken(currentColor,.35)); } freePath=null; freeD=''; freeStart=null; freeLast=null; setTool(null); }
 
