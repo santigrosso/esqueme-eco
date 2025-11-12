@@ -261,6 +261,7 @@
 
   var currentTool = null;
   var currentColor = '#FFD600';
+  var currentAlpha = 0.70;
   
   var undoStack = []; var redoStack = [];
   function pushAdd(el){ undoStack.push({type:'add', el:el, parent:el.parentNode, nextSibling:el.nextSibling}); redoStack.length=0; }
