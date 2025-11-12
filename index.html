@@ -484,6 +484,24 @@
   if(toolsPanel){ toolsPanel.addEventListener('click', function(ev){ var btn = ev.target.closest ? ev.target.closest('.tool') : null; if(!btn) return; var tool = btn.getAttribute('data-tool'); if(tool==='color'){ if(palette){ var open=palette.classList.toggle('open'); palette.setAttribute('aria-hidden', open? 'false':'true'); } return; } if(tool==='undo'){ cmdUndo(); return; } if(tool==='redo'){ cmdRedo(); return; } setTool(tool); }); }
   if(palette){ palette.addEventListener('click', function(ev){ var sw = ev.target.closest ? ev.target.closest('.sw') : null; if(!sw) return; currentColor = sw.getAttribute('data-color'); applyColorChip(); $$('#palette .sw').forEach(function(s){ s.classList.toggle('active', s===sw); }); }); }
 
+  // === Transparencia (slider) ===
+var alphaRange = document.getElementById('alphaRange');
+var alphaValue = document.getElementById('alphaValue');
+
+// Función para actualizar el valor de transparencia
+function setAlphaFromRange(){
+  var v = parseInt(alphaRange.value, 10);
+  v = isNaN(v) ? 70 : Math.min(100, Math.max(10, v));
+  currentAlpha = v / 100; // de 0.10 a 1.00
+  if(alphaValue) alphaValue.textContent = v + '%';
+}
+
+// Si existe el control, inicializar y escuchar cambios
+if(alphaRange){
+  setAlphaFromRange(); // valor inicial = 70%
+  alphaRange.addEventListener('input', setAlphaFromRange);
+}
+
   var btnClearPins = document.getElementById('btnClearPins'); if(btnClearPins) btnClearPins.addEventListener('click', function(){ clearPins(); clearFree(); clearLines(); clearLabels(); clearSelection(); });
   var btnPDF = document.getElementById('btnPDF'); if(btnPDF) btnPDF.addEventListener('click', function(){ window.print(); });
 
