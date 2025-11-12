@@ -162,12 +162,11 @@
           <button class="sw" data-color="#FF9100" style="background:#FF9100"></button>
           <button class="sw" data-color="#FFD600" style="background:#FFD600"></button>
           <button class="sw" data-color="#000000" style="background:#000000"></button>
-          <!-- Slider de transparencia -->
-<div class="alpha-wrap" style="grid-column:1 / -1; display:flex; align-items:center; gap:8px; padding-top:6px;">
-  <label for="alphaRange" style="color:#e8eef7; font-size:12px; white-space:nowrap;">Opacidad</label>
-  <input id="alphaRange" type="range" min="10" max="100" value="70" step="1" 
-         style="flex:1; accent-color:#FFD600;">
-  <span id="alphaValue" style="color:#e8eef7; font-size:12px; width:36px; text-align:right;">70%</span>
+         <!-- Slider de transparencia (solo barrita) -->
+<div class="alpha-wrap" style="grid-column:1 / -1; padding-top:4px;">
+  <input id="alphaRange" type="range" min="10" max="100" value="70" step="1"
+         style="width:100%; accent-color:#FFD600;">
+
 </div>
         </div>
         <button class="tool" data-tool="erase" title="Borrar" aria-label="Borrar">
