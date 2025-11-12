@@ -253,8 +253,8 @@
   var lado = 'derecho';
 
   var currentTool = null;
-  var currentColor = '#FF1744';
-
+  var currentColor = '#FFD600';
+  
   var undoStack = []; var redoStack = [];
   function pushAdd(el){ undoStack.push({type:'add', el:el, parent:el.parentNode, nextSibling:el.nextSibling}); redoStack.length=0; }
   function pushRemove(el,parent,next){ undoStack.push({type:'remove', el:el, parent:parent, nextSibling:next}); redoStack.length=0; }
