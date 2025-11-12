@@ -323,7 +323,13 @@
 
   var drawing=null, start=null; var freePath=null, freeD='', freeStart=null, freeLast=null; var lineEl=null, lineStart=null; var shapeEl=null, shapeStart=null;
 
-  function startStar(e){ var p=svgPoint(e.clientX, e.clientY); start=p; var path=document.createElementNS('http://www.w3.org/2000/svg','path'); path.setAttribute('class','pin'); path.setAttribute('fill', currentColor); path.setAttribute('stroke', darken(currentColor,.3)); path.setAttribute('stroke-width','.8'); path.setAttribute('d', starPath(p.x,p.y,STAR_MIN)); pins.appendChild(path); pushAdd(path); drawing=path; ensureData(path); }
+  function startStar(e){ var p=svgPoint(e.clientX, e.clientY); start=p; var path=document.createElementNS('http://www.w3.org/2000/svg','path'); path.setAttribute('class','pin');
+path.setAttribute('fill', currentColor);
+path.setAttribute('fill-opacity', currentAlpha);   // ✅ SOLO relleno con opacidad
+path.setAttribute('stroke', darken(currentColor,.3));
+path.setAttribute('stroke-width','.8');
+path.setAttribute('stroke-opacity','1');           // ✅ borde siempre sólido
+path.setAttribute('d', starPath(p.x,p.y,STAR_MIN)); pins.appendChild(path); pushAdd(path); drawing=path; ensureData(path); }
   function updateStar(e){ if(!drawing) return; var p=svgPoint(e.clientX, e.clientY); var dx=p.x-start.x, dy=p.y-start.y; var r=Math.max(STAR_MIN, Math.min(STAR_MAX, Math.hypot(dx,dy))); drawing.setAttribute('d', starPath(start.x,start.y,r)); }
   function endStar(){ drawing=null; start=null; setTool(null); }
 
