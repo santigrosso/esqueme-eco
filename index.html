@@ -350,7 +350,10 @@ freePath.setAttribute('fill','none');         // sin fill mientras está abierto
 }
  freePath=null; freeD=''; freeStart=null; freeLast=null; setTool(null); }
 
-  function startLine(e){ var p=svgPoint(e.clientX, e.clientY); lineStart=p; lineEl=document.createElementNS('http://www.w3.org/2000/svg','line'); lineEl.setAttribute('class','line'); lineEl.setAttribute('x1', p.x); lineEl.setAttribute('y1', p.y); lineEl.setAttribute('x2', p.x); lineEl.setAttribute('y2', p.y); lineEl.setAttribute('stroke', darken(currentColor,.25)); lineEl.setAttribute('stroke-width','1.2'); linesGrp.appendChild(lineEl); pushAdd(lineEl); ensureData(lineEl); }
+  function startLine(e){ var p=svgPoint(e.clientX, e.clientY); lineStart=p; lineEl=document.createElementNS('http://www.w3.org/2000/svg','line'); lineEl.setAttribute('class','line'); lineEl.setAttribute('x1', p.x); lineEl.setAttribute('y1', p.y); lineEl.setAttribute('x2', p.x); lineEl.setAttribute('y2', p.y); lineEl.setAttribute('stroke', darken(currentColor,.25));
+lineEl.setAttribute('stroke-width','1.2');
+lineEl.setAttribute('stroke-opacity','1');  // ✅ sólido
+ linesGrp.appendChild(lineEl); pushAdd(lineEl); ensureData(lineEl); }
   function updateLine(e){ if(!lineEl) return; var p=svgPoint(e.clientX, e.clientY); lineEl.setAttribute('x2', p.x); lineEl.setAttribute('y2', p.y); }
   function endLine(e){ if(!lineEl) return; var p=svgPoint(e.clientX, e.clientY); var len=Math.hypot(p.x-lineStart.x, p.y-lineStart.y); if(len<6){ var parent=lineEl.parentNode; var next=lineEl.nextSibling; parent.removeChild(lineEl); undoStack.pop(); } lineEl=null; lineStart=null; setTool(null); }
 
