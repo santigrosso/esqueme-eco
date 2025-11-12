@@ -109,13 +109,11 @@
     <div class="fld"><label>Nombre y Apellido</label><input id="inpNombre" placeholder="Apellido, Nombre"/></div>
     <div class="fld"><label>Fecha de lesión</label><input id="inpFecha" type="date"/></div>
  <div class="actions">
-  <div style="position:relative;display:inline-block">
-    <button class="btn ghost" id="btnAddPhoto" title="Agregar imágenes">Agregar imágenes</button>
-    <!-- Menú chico con 2 opciones -->
-    <div id="photoMenu" style="display:none;position:absolute;left:0;top:110%;background:#fff;border:1px solid #d2d8e2;border-radius:.6rem;box-shadow:0 6px 18px rgba(0,0,0,.12);overflow:hidden;z-index:20">
-      <button type="button" id="optCamera"  style="display:block;padding:.6rem 1rem;width:220px;text-align:left;background:#fff;color:#0e1320;border:0;cursor:pointer">📷 Tomar foto</button>
-      <button type="button" id="optGallery" style="display:block;padding:.6rem 1rem;width:220px;text-align:left;background:#fff;color:#0e1320;border:0;border-top:1px solid #eef3f9;cursor:pointer">🖼️ Elegir de galería</button>
-    </div>
+  <button class="btn ghost" id="btnAddPhoto" title="Agregar imágenes">Agregar imágenes</button>
+  <button class="btn primary" id="btnPDF">Generar PDF</button>
+  <!-- Único input: abre galería/archivos -->
+  <input id="inpPhotoGal" type="file" accept="image/*" multiple hidden>
+</div>
   </div>
 
   <button class="btn primary" id="btnPDF">Generar PDF</button>
