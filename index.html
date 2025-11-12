@@ -490,47 +490,94 @@
   var btnClearPins = document.getElementById('btnClearPins'); if(btnClearPins) btnClearPins.addEventListener('click', function(){ clearPins(); clearFree(); clearLines(); clearLabels(); clearSelection(); });
   var btnPDF = document.getElementById('btnPDF'); if(btnPDF) btnPDF.addEventListener('click', function(){ window.print(); });
 
-  // === Fotos: captura/carga y maquetado a 2 por página ===
-  var photos = [];
-  var btnAddPhoto = document.getElementById('btnAddPhoto');
-  var inpPhoto = document.getElementById('inpPhoto');
+ // === Fotos: captura/carga y maquetado a 2 por página ===
+var photos = [];
+var btnAddPhoto = document.getElementById('btnAddPhoto');
+var photoMenu   = document.getElementById('photoMenu');
+var inpPhotoCam = document.getElementById('inpPhotoCam');
+var inpPhotoGal = document.getElementById('inpPhotoGal');
 
-  function renderPhotosPrint(){
-    var cont = document.getElementById('photosPrint');
-    if(!cont) return;
-    cont.innerHTML='';
-    if(!photos.length) return;
-    for(var i=0;i<photos.length;i+=2){
-      var page = document.createElement('div');
-      page.className = 'print-page';
-      for(var j=i;j<i+2 && j<photos.length;j++){
-        var img = document.createElement('img');
-        img.className = 'print-img';
-        img.src = photos[j];
-        page.appendChild(img);
-      }
-      cont.appendChild(page);
+function renderPhotosPrint(){
+  var cont = document.getElementById('photosPrint');
+  if(!cont) return;
+  cont.innerHTML = '';
+  if(!photos.length) return;
+
+  for(var i=0;i<photos.length;i+=2){
+    var page = document.createElement('div');
+    page.className = 'print-page';
+    for(var j=i;j<i+2 && j<photos.length;j++){
+      var img = document.createElement('img');
+      img.className = 'print-img';
+      img.src = photos[j];
+      page.appendChild(img);
+    }
+    cont.appendChild(page);
+  }
+}
+
+function handleFiles(fileList){
+  var files = Array.prototype.slice.call(fileList || []);
+  if(!files.length) return;
+  var pending = files.length;
+  files.forEach(function(f){
+    var reader = new FileReader();
+    reader.onload = function(e){
+      photos.push(e.target.result);
+      pending--;
+      if(pending===0){ renderPhotosPrint(); }
+    };
+    reader.readAsDataURL(f);
+  });
+}
+
+function closePhotoMenu(){ if(photoMenu) photoMenu.style.display='none'; }
+function togglePhotoMenu(){
+  if(!photoMenu) return;
+  photoMenu.style.display = (photoMenu.style.display==='none' || photoMenu.style.display==='') ? 'block' : 'none';
+}
+
+// Abrir menú
+if(btnAddPhoto){
+  btnAddPhoto.addEventListener('click', function(e){
+    e.stopPropagation();
+    togglePhotoMenu();
+  });
+  // Cerrar al click afuera
+  document.addEventListener('click', function(){ closePhotoMenu(); });
+  // Evitar cierre al hacer click dentro del menú
+  if(photoMenu){
+    photoMenu.addEventListener('click', function(e){ e.stopPropagation(); });
+    var optCamera  = document.getElementById('optCamera');
+    var optGallery = document.getElementById('optGallery');
+    if(optCamera){
+      optCamera.addEventListener('click', function(){
+        closePhotoMenu();
+        if(inpPhotoCam) inpPhotoCam.click(); // fuerza cámara
+      });
+    }
+    if(optGallery){
+      optGallery.addEventListener('click', function(){
+        closePhotoMenu();
+        if(inpPhotoGal) inpPhotoGal.click(); // abre galería/archivos
+      });
     }
   }
+}
 
-  if(btnAddPhoto && inpPhoto){
-    btnAddPhoto.addEventListener('click', function(){ inpPhoto.click(); });
-    inpPhoto.addEventListener('change', function(ev){
-      var files = Array.prototype.slice.call(ev.target.files || []);
-      if(!files.length) return;
-      var pending = files.length;
-      files.forEach(function(f){
-        var reader = new FileReader();
-        reader.onload = function(e){
-          photos.push(e.target.result);
-          pending--;
-          if(pending===0){ renderPhotosPrint(); }
-        };
-        reader.readAsDataURL(f);
-      });
-      ev.target.value=''; // permite volver a elegir los mismos archivos
-    });
-  }
+// Carga de archivos
+if(inpPhotoCam){
+  inpPhotoCam.addEventListener('change', function(ev){
+    handleFiles(ev.target.files);
+    ev.target.value=''; // permite re-seleccionar iguales
+  });
+}
+if(inpPhotoGal){
+  inpPhotoGal.addEventListener('change', function(ev){
+    handleFiles(ev.target.files);
+    ev.target.value='';
+  });
+}
 
   // Tabs / Lado
   var tabsEl = document.getElementById('tabs'); if(tabsEl){ tabsEl.addEventListener('click', function(e){ var t = e.target && e.target.closest ? e.target.closest('.tab') : null; if(!t) return; $$('#tabs .tab').forEach(function(o){ o.classList.remove('active'); }); t.classList.add('active'); musculo = t.getAttribute('data-musculo'); clearPins(); clearFree(); clearLines(); clearLabels(); clearSelection(); loadSVG(); }); }
