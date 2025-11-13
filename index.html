@@ -99,6 +99,31 @@
     .photos-print .print-page:last-child{ page-break-after:auto; }
     .photos-print .print-img{ width:100%; height:auto; display:block; margin:0 0 8mm 0; }
   }
+  /* ===== Modal recorte ===== */
+.cropper-modal{
+  position: fixed; inset: 0; background: rgba(0,0,0,.6);
+  display: none; z-index: 9999; padding: 4vh 4vw; 
+}
+.cropper-dialog{
+  background:#111; color:#fff; border-radius:12px; overflow:hidden;
+  display:flex; flex-direction:column; height:100%;
+  border:1px solid rgba(255,255,255,.12);
+}
+.cropper-header{ padding:.8rem 1rem; border-bottom:1px solid rgba(255,255,255,.12); }
+.cropper-body{
+  position:relative; flex:1; background:#000; min-height:200px;
+  display:flex; align-items:center; justify-content:center;
+}
+.cropper-body img{ max-width:100%; max-height:100%; display:block; }
+.cropper-footer{
+  padding:.8rem 1rem; border-top:1px solid rgba(255,255,255,.12);
+  display:flex; justify-content:flex-end; gap:.5rem; background:#0e0e0e;
+}
+/* No imprimir el modal */
+@media print{
+  .cropper-modal{ display:none !important; }
+}
+
 </style>
   <!-- Cropper.js — estilos y script -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
