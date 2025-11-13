@@ -699,20 +699,6 @@ if(inpPhotoGal){
   });
 }
 
-// Click en "Agregar imágenes" = abrir galería directamente
-if(btnAddPhoto){
-  btnAddPhoto.addEventListener('click', function(){
-    if(inpPhotoGal) inpPhotoGal.click();
-  });
-}
-
-// Cargar archivos seleccionados
-if(inpPhotoGal){
-  inpPhotoGal.addEventListener('change', function(ev){
-    handleFiles(ev.target.files);
-    ev.target.value=''; // permite re-seleccionar los mismos
-  });
-}
 
   // Tabs / Lado
   var tabsEl = document.getElementById('tabs'); if(tabsEl){ tabsEl.addEventListener('click', function(e){ var t = e.target && e.target.closest ? e.target.closest('.tab') : null; if(!t) return; $$('#tabs .tab').forEach(function(o){ o.classList.remove('active'); }); t.classList.add('active'); musculo = t.getAttribute('data-musculo'); clearPins(); clearFree(); clearLines(); clearLabels(); clearSelection(); loadSVG(); }); }
