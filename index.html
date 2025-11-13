@@ -646,6 +646,7 @@ function openCropperWithDataURL(dataURL){
       // Relación de aspecto recomendada para que el PDF quede prolijo.
       // 4/3 luce muy bien en A4 con 2 por página. Cambiá si querés.
       aspectRatio: 4 / 3
+      modal: false   // ✅ sin velo interno de Cropper
     });
   };
   cropperImg.src = dataURL;
