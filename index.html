@@ -562,15 +562,27 @@ if(alphaRange){
   var btnClearPins = document.getElementById('btnClearPins'); if(btnClearPins) btnClearPins.addEventListener('click', function(){ clearPins(); clearFree(); clearLines(); clearLabels(); clearSelection(); });
   var btnPDF = document.getElementById('btnPDF'); if(btnPDF) btnPDF.addEventListener('click', function(){ window.print(); });
 
- // === Fotos: carga desde galería y maquetado a 2 por página ===
-var photos = [];
+// === Fotos con recorte (Cropper.js) y maquetado 2 por página ===
+var photos = []; // aquí quedan las imágenes finales (recortadas)
 var btnAddPhoto = document.getElementById('btnAddPhoto');
 var inpPhotoGal = document.getElementById('inpPhotoGal');
 
+// Modal & cropper
+var cropper = null;
+var cropperModal = document.getElementById('cropperModal');
+var cropperImg   = document.getElementById('cropperImage');
+var cropCancel   = document.getElementById('cropCancel');
+var cropUse      = document.getElementById('cropUse');
+
+// Cola de archivos a recortar (si seleccionás varias)
+var fileQueue = [];
+var currentFile = null;
+
+// Render en el informe (2 por hoja)
 function renderPhotosPrint(){
   var cont = document.getElementById('photosPrint');
   if(!cont) return;
-  cont.innerHTML = '';
+  cont.innerHTML='';
   if(!photos.length) return;
 
   for(var i=0;i<photos.length;i+=2){
@@ -586,18 +598,89 @@ function renderPhotosPrint(){
   }
 }
 
-function handleFiles(fileList){
-  var files = Array.prototype.slice.call(fileList || []);
-  if(!files.length) return;
-  var pending = files.length;
-  files.forEach(function(f){
-    var reader = new FileReader();
-    reader.onload = function(e){
-      photos.push(e.target.result);
-      pending--;
-      if(pending===0){ renderPhotosPrint(); }
-    };
-    reader.readAsDataURL(f);
+// Abrir modal con una imagen (dataURL) en cropper
+function openCropperWithDataURL(dataURL){
+  cropperImg.onload = function(){
+    // Destruir previa instancia
+    if(cropper){ try{ cropper.destroy(); }catch(_){ } cropper = null; }
+    // Inicializar cropper
+    cropper = new Cropper(cropperImg, {
+      viewMode: 1,           // no permitir salir del lienzo
+      dragMode: 'move',
+      autoCropArea: 1,
+      movable: true,
+      zoomable: true,
+      responsive: true,
+      background: false,
+      // Relación de aspecto recomendada para que el PDF quede prolijo.
+      // 4/3 luce muy bien en A4 con 2 por página. Cambiá si querés.
+      aspectRatio: 4 / 3
+    });
+  };
+  cropperImg.src = dataURL;
+  cropperModal.style.display = 'block';
+  cropperModal.setAttribute('aria-hidden','false');
+}
+
+// Cerrar modal
+function closeCropperModal(){
+  if(cropper){ try{ cropper.destroy(); }catch(_){ } cropper = null; }
+  cropperModal.style.display = 'none';
+  cropperModal.setAttribute('aria-hidden','true');
+}
+
+// Procesar siguiente archivo de la cola
+function processNextFile(){
+  if(!fileQueue.length){ currentFile = null; renderPhotosPrint(); return; }
+  currentFile = fileQueue.shift();
+  var reader = new FileReader();
+  reader.onload = function(e){
+    openCropperWithDataURL(e.target.result);
+  };
+  reader.readAsDataURL(currentFile);
+}
+
+// Confirmar recorte → agregar a photos[] y seguir
+if(cropUse){
+  cropUse.addEventListener('click', function(){
+    if(!cropper) { closeCropperModal(); processNextFile(); return; }
+    // Canvas recortado
+    var canvas = cropper.getCroppedCanvas({
+      // tamaño de exportación (opcional). Si lo omitís, usa el del recorte.
+      // width: 1600, height: 1200 // 4:3 (ajustá si querés)
+    });
+    var dataURL = canvas.toDataURL('image/jpeg', 0.9);
+    photos.push(dataURL);      // sumamos la imagen recortada al informe
+    closeCropperModal();
+    processNextFile();         // siguiente de la cola
+  });
+}
+
+// Cancelar recorte → no agrega, pero sigue con el siguiente
+if(cropCancel){
+  cropCancel.addEventListener('click', function(){
+    closeCropperModal();
+    processNextFile();
+  });
+}
+
+// Click en "Agregar imágenes" = abrir galería
+if(btnAddPhoto){
+  btnAddPhoto.addEventListener('click', function(){
+    if(inpPhotoGal) inpPhotoGal.click();
+  });
+}
+
+// Al elegir archivos de galería, encolarlos y comenzar
+if(inpPhotoGal){
+  inpPhotoGal.addEventListener('change', function(ev){
+    var files = Array.prototype.slice.call(ev.target.files || []);
+    if(!files.length) return;
+    // metemos en la cola y arrancamos si estaba vacía
+    var wasIdle = (fileQueue.length===0 && !currentFile);
+    fileQueue = fileQueue.concat(files);
+    if(wasIdle){ processNextFile(); }
+    ev.target.value = ''; // permitir re-seleccionar iguales
   });
 }
 
