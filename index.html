@@ -99,33 +99,45 @@
     .photos-print .print-page:last-child{ page-break-after:auto; }
     .photos-print .print-img{ width:100%; height:auto; display:block; margin:0 0 8mm 0; }
   }
-/* ===== Modal recorte (estilo sólido) ===== */
-.cropper-modal{
+/* ===== Modal recorte (tu overlay, sin conflictos) ===== */
+.photo-modal{
   position: fixed; inset: 0;
-  background: rgba(0,0,0,.35);   /* oscurece el fondo, pero NO el modal */
-  display: none; z-index: 9999; padding: 4vh 4vw;
+  background: rgba(0,0,0,.6);     /* oscurece el fondo */
+  display: none; z-index: 2147483647;  /* por encima de todo */
+  padding: 4vh 4vw;
 }
-.cropper-dialog{
-  background:#ffffff;            /* ✅ sólido, ya no translúcido */
+.photo-modal .cropper-dialog{
+  background:#ffffff;
   color:#0e1320;
   border-radius:12px; overflow:hidden;
   display:flex; flex-direction:column; height:100%;
-  border:1px solid #d9e1ec;      /* borde claro */
+  border:1px solid #d9e1ec;
   box-shadow: 0 18px 48px rgba(0,0,0,.2);
 }
-.cropper-header{ padding:.8rem 1rem; border-bottom:1px solid #e7ecf3; }
-.cropper-body{
-  position:relative; flex:1; background:#fff; /* ✅ blanco sólido detrás de la imagen */
+.photo-modal .cropper-header{
+  padding:.8rem 1rem; border-bottom:1px solid #e7ecf3;
+}
+.photo-modal .cropper-body{
+  position:relative; flex:1; background:#fff;
   display:flex; align-items:center; justify-content:center; min-height:200px;
 }
-.cropper-body img{ max-width:100%; max-height:100%; display:block; opacity:1; } /* ✅ por las dudas */
-.cropper-footer{
+.photo-modal .cropper-body img{
+  max-width:100%; max-height:100%; display:block; opacity:1;
+}
+.photo-modal .cropper-footer{
   padding:.8rem 1rem; border-top:1px solid #e7ecf3;
   display:flex; justify-content:flex-end; gap:.5rem; background:#f6f8fb;
 }
-/* No imprimir el modal */
+
+/* No imprimir tu modal */
 @media print{
-  .cropper-modal{ display:none !important; }
+  .photo-modal{ display:none !important; }
+}
+
+/* ===== Overrides de Cropper para evitar velos extras ===== */
+/* Si igual ves “velo” dentro del recorte, forzamos transparencia: */
+.cropper-container .cropper-modal{
+  background: transparent !important;   /* máscara interna de Cropper */
 }
 
 </style>
