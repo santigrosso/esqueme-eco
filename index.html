@@ -280,6 +280,21 @@
   <footer>Desarrollado por Santiago Grosso</footer>
 </div>
 
+<!-- Modal de recorte  ✅ MOVER AQUÍ, antes del <script> -->
+<div id="cropperModal" class="cropper-modal" aria-hidden="true" style="display:none;">
+  <div class="cropper-dialog">
+    <div class="cropper-header">
+      <strong>Recortar imagen</strong>
+    </div>
+    <div class="cropper-body">
+      <img id="cropperImage" alt="Ajustá el encuadre">
+    </div>
+    <div class="cropper-footer">
+      <button type="button" id="cropCancel" class="btn ghost">Cancelar</button>
+      <button type="button" id="cropUse" class="btn primary">Usar imagen</button>
+    </div>
+  </div>
+</div>
 <script>
 (function(){
   var BASE_SVG_PATH = './svg';
