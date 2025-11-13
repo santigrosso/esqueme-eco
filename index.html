@@ -630,5 +630,21 @@ if(inpPhotoGal){
   loadSVG(); applyColorChip(); setTool(null); renderGrado('bamic');
 })();
 </script>
+  <!-- Modal de recorte -->
+<div id="cropperModal" class="cropper-modal" aria-hidden="true" style="display:none;">
+  <div class="cropper-dialog">
+    <div class="cropper-header">
+      <strong>Recortar imagen</strong>
+    </div>
+    <div class="cropper-body">
+      <img id="cropperImage" alt="Ajustá el encuadre">
+    </div>
+    <div class="cropper-footer">
+      <button type="button" id="cropCancel" class="btn ghost">Cancelar</button>
+      <button type="button" id="cropUse" class="btn primary">Usar imagen</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
