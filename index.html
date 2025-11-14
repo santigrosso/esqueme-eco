@@ -103,12 +103,15 @@
     break-inside: avoid;
     page-break-inside: avoid;
   }
+  /* 👇 Fuerza que DESPUÉS del panel de características venga una página nueva */
+  .caract{
+    page-break-after: always;   /* clave para la tablet */
+  }
 
   /* Mostrar las fotos recién a partir de la segunda hoja */
   #photosPrint{
     display:block;
-    page-break-before: always;  /* fuerza que empiece en una nueva página */
-  }
+    }
 
   /* Cada .print-page es una hoja de fotos (máx. 2 por página) */
   .photos-print .print-page{
