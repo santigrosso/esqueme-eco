@@ -91,14 +91,41 @@
   .handle{ fill:#fff; stroke:none; width:8px; height:8px; pointer-events:all; cursor:pointer; }
   .handle.rotate{ fill:#FFD600; stroke:none; r:6; }
 
-  /* Contenedor de fotos para impresión */
-  .photos-print{ display:none; }
-  @media print{
-    .photos-print{ display:block; page-break-before:always; }
-    .photos-print .print-page{ page-break-after:always; }
-    .photos-print .print-page:last-child{ page-break-after:auto; }
-    .photos-print .print-img{ width:100%; height:auto; display:block; margin:0 0 8mm 0; }
+/* Contenedor de fotos para impresión */
+.photos-print{ display:none; }
+
+@media print{
+  /* Evitar que el panel o el SVG se corten entre páginas */
+  header, .panel-datos, .svg-panel, .caract{
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
+
+  /* Mostrar las fotos recién a partir de la segunda hoja */
+  #photosPrint{
+    display:block;
+    page-break-before: always;  /* fuerza empezar en nueva hoja */
+  }
+
+  /* Cada grupo de 2 fotos = una hoja */
+  .photos-print .print-page{
+    page-break-after: always;
+  }
+  .photos-print .print-page:last-child{
+    page-break-after: auto;
+  }
+
+  /* Ajustar tamaño para que entren 2 por hoja (A4) */
+  .photos-print .print-img{
+    width:100%;
+    height:12.5cm;        /* más chico que antes, entran 2 justas */
+    object-fit:cover;     /* recorte limpio sin deformar */
+    object-position:center;
+    display:block;
+    margin:0 0 8mm 0;     /* espacio entre ambas fotos */
+  }
+}
+
 /* ===== Modal recorte (tu overlay, sin conflictos) ===== */
 .photo-modal{
   position: fixed; inset: 0;
