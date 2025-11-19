@@ -91,29 +91,23 @@
   .handle{ fill:#fff; stroke:none; width:8px; height:8px; pointer-events:all; cursor:pointer; }
   .handle.rotate{ fill:#FFD600; stroke:none; r:6; }
 
-/* Contenedor de fotos para impresión */
+/* Contenedor de fotos para impresión: oculto en pantalla */
 .photos-print{ display:none; }
 
 @media print{
-  /* Evitar que se corten estos bloques entre páginas */
-  header,
-  .panel-datos,
-  .svg-panel,
-  .caract{
+  /* ✅ Toda la primera hoja va dentro de .print-page1 */
+  .print-page1{
+    page-break-after: always;   /* SIEMPRE termina la página acá */
     break-inside: avoid;
     page-break-inside: avoid;
   }
-  /* 👇 Fuerza que DESPUÉS del panel de características venga una página nueva */
-  .caract{
-    page-break-after: always;   /* clave para la tablet */
-  }
 
-  /* Mostrar las fotos recién a partir de la segunda hoja */
+  /* No hace falta pedir página nueva en photosPrint: viene después de page1 */
   #photosPrint{
     display:block;
-    }
+  }
 
-  /* Cada .print-page es una hoja de fotos (máx. 2 por página) */
+  /* Cada grupo de 2 fotos = una hoja nueva */
   .photos-print .print-page{
     page-break-after: always;
   }
@@ -124,13 +118,14 @@
   /* Ajustar las fotos para que entren 2 por hoja en A4 */
   .photos-print .print-img{
     width:100%;
-    height:12.5cm;         /* más baja para que quepan 2 sin apretarse */
-    object-fit:cover;      /* recorta un poco si hace falta, sin deformar */
+    height:12.5cm;          /* tamaño reducido para que entren 2 */
+    object-fit:cover;
     object-position:center;
     display:block;
-    margin:0 0 8mm 0;      /* espacio entre fotos */
+    margin:0 0 8mm 0;
   }
 }
+
 
 /* ===== Modal recorte (tu overlay, sin conflictos) ===== */
 .photo-modal{
