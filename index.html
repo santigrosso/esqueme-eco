@@ -178,7 +178,52 @@
   background: transparent !important;   /* máscara interna de Cropper */
 }
 
+/* ====== HEADER PROFESIONAL PARA EL INFORME ====== */
+.report-header{
+  background:#1F2D53;
+  padding:18px 24px;
+  color:#fff;
+  margin:0;
+}
+
+.header-inner{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+}
+
+.report-title{
+  text-align:center;
+  margin:0;
+  font-size:28px;
+  font-weight:700;
+  line-height:1.2;
+  color:#fff;
+}
+
+.report-title span{
+  font-weight:400;
+  font-size:22px;
+  opacity:0.95;
+}
+
+.talleres-logo{
+  position:absolute;
+  right:0;
+  height:54px;
+  width:auto;
+}
+
+@media (max-width:780px){
+  .report-title{ font-size:24px; }
+  .report-title span{ font-size:18px; }
+  .talleres-logo{ height:44px; right:8px; }
+}
+
+/* 👇 ESTE CIERRE YA ESTABA */
 </style>
+
   <!-- Cropper.js — estilos y script -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
 <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
