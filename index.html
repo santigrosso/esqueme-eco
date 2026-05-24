@@ -222,6 +222,38 @@
 }
 
 /* 👇 ESTE CIERRE YA ESTABA */
+  /* ===== Lupita para dibujo libre ===== */
+.free-magnifier{
+  position:absolute;
+  width:140px;
+  height:140px;
+  border-radius:50%;
+  overflow:hidden;
+  display:none;
+  pointer-events:none;
+  z-index:20;
+  border:3px solid #fff;
+  box-shadow:0 8px 24px rgba(0,0,0,.35);
+  background:#1c1f25;
+}
+
+.free-magnifier svg{
+  position:absolute;
+  transform-origin:0 0;
+  pointer-events:none;
+}
+
+.free-magnifier::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:14px;
+  height:14px;
+  transform:translate(-50%,-50%);
+  border:2px solid #FFD600;
+  border-radius:50%;
+}
 </style>
 
   <!-- Cropper.js — estilos y script -->
@@ -343,7 +375,9 @@
           <text x="800" y="430" fill="#8fa7c7" font-size="42" text-anchor="middle" font-family="system-ui, -apple-system">Pegaremos aquí el SVG de <tspan id="tMusculo">RAC</tspan> — <tspan id="tLado">derecho</tspan></text>
           <text id="phMsg" x="800" y="490" text-anchor="middle" font-family="system-ui, -apple-system">Subí el archivo faltante a ./svg/<tspan id="phMus">rac</tspan>/<tspan id="phFile">rac-derecho.svg</tspan></text>
         </g>
-      </svg>
+           </svg>
+
+      <div id="freeMagnifier" class="free-magnifier" aria-hidden="true"></div>
     </div>
   </section>
 
