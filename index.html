@@ -477,6 +477,63 @@
   var tMus     = document.getElementById('tMusculo');
   var tLado    = document.getElementById('tLado');
   var overlay  = document.getElementById('transformOverlay');
+    // ===== Lupita para dibujo libre =====
+  var freeMagnifier = document.getElementById('freeMagnifier');
+  var freeMagSVG = null;
+  var FREE_MAG_ZOOM = 2.4;
+  var FREE_MAG_SIZE = 140;
+
+  function ensureFreeMagnifier(){
+    if(!freeMagnifier || !panelSVG) return;
+    if(!freeMagSVG){
+      freeMagSVG = panelSVG.cloneNode(true);
+      freeMagSVG.removeAttribute('id');
+      freeMagSVG.style.pointerEvents = 'none';
+      freeMagnifier.appendChild(freeMagSVG);
+    }
+  }
+
+  function updateFreeMagnifier(e){
+    if(!freeMagnifier || !panelSVG || currentTool !== 'free' || !freePath) return;
+
+    ensureFreeMagnifier();
+
+    var rect = panelSVG.getBoundingClientRect();
+    var canvasRect = panelSVG.parentElement.getBoundingClientRect();
+
+    var localX = e.clientX - rect.left;
+    var localY = e.clientY - rect.top;
+
+    freeMagSVG.setAttribute('viewBox', panelSVG.getAttribute('viewBox') || '0 0 1600 900');
+    freeMagSVG.innerHTML = panelSVG.innerHTML;
+
+    freeMagSVG.style.width = rect.width + 'px';
+    freeMagSVG.style.height = rect.height + 'px';
+
+    freeMagSVG.style.left = ((FREE_MAG_SIZE / 2) - localX * FREE_MAG_ZOOM) + 'px';
+    freeMagSVG.style.top  = ((FREE_MAG_SIZE / 2) - localY * FREE_MAG_ZOOM) + 'px';
+    freeMagSVG.style.transform = 'scale(' + FREE_MAG_ZOOM + ')';
+
+    var offsetX = 48;
+    var offsetY = -165;
+
+    var left = e.clientX - canvasRect.left + offsetX;
+    var top  = e.clientY - canvasRect.top  + offsetY;
+
+    left = Math.max(8, Math.min(left, canvasRect.width - FREE_MAG_SIZE - 8));
+    top  = Math.max(8, Math.min(top, canvasRect.height - FREE_MAG_SIZE - 8));
+
+    freeMagnifier.style.left = left + 'px';
+    freeMagnifier.style.top = top + 'px';
+    freeMagnifier.style.display = 'block';
+    freeMagnifier.setAttribute('aria-hidden','false');
+  }
+
+  function hideFreeMagnifier(){
+    if(!freeMagnifier) return;
+    freeMagnifier.style.display = 'none';
+    freeMagnifier.setAttribute('aria-hidden','true');
+  }
 
   function loadSVG(){
     if(!artwork) return Promise.resolve();
