@@ -787,7 +787,9 @@ shapeEl.setAttribute('d', burstPath(p.x,p.y,SHAPE_MIN,14,0.45)); pins.appendChil
   if(panelSVG){ panelSVG.addEventListener('pointerdown', onPointerDown, {passive:false}); window.addEventListener('pointermove', onPointerMove, {passive:false}); window.addEventListener('pointerup', onPointerEnd, {passive:false}); window.addEventListener('pointercancel', onPointerEnd, {passive:false}); panelSVG.addEventListener('dblclick', onDoubleClick); }
 
   var btnTools = document.getElementById('btnTools'); var toolsPanel = document.getElementById('tools'); var palette = document.getElementById('palette');
-  function setTool(name){ currentTool=name; $$('#tools .tool').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-tool')===name); }); if(name!=='color' && palette){ palette.classList.remove('open'); palette.setAttribute('aria-hidden','true'); } }
+    function setTool(name){ 
+    if(name !== 'free'){ hideFreeMagnifier(); }
+    currentTool=name; $$('#tools .tool').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-tool')===name); }); if(name!=='color' && palette){ palette.classList.remove('open'); palette.setAttribute('aria-hidden','true'); } }
   if(btnTools){ btnTools.addEventListener('click', function(){ var open = toolsPanel.classList.toggle('open'); toolsPanel.setAttribute('aria-hidden', open? 'false':'true'); }); }
   if(toolsPanel){ toolsPanel.addEventListener('click', function(ev){ var btn = ev.target.closest ? ev.target.closest('.tool') : null; if(!btn) return; var tool = btn.getAttribute('data-tool'); if(tool==='color'){ if(palette){ var open=palette.classList.toggle('open'); palette.setAttribute('aria-hidden', open? 'false':'true'); } return; } if(tool==='undo'){ cmdUndo(); return; } if(tool==='redo'){ cmdRedo(); return; } setTool(tool); }); }
   if(palette){ palette.addEventListener('click', function(ev){ var sw = ev.target.closest ? ev.target.closest('.sw') : null; if(!sw) return; currentColor = sw.getAttribute('data-color'); applyColorChip(); $$('#palette .sw').forEach(function(s){ s.classList.toggle('active', s===sw); }); }); }
