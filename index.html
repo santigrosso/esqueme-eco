@@ -600,7 +600,14 @@ path.setAttribute('d', starPath(p.x,p.y,STAR_MIN)); pins.appendChild(path); push
     ensureData(freePath);
     updateFreeMagnifier(e);
   }
-  function updateFree(e){ if(!freePath) return; var p=svgPoint(e.clientX, e.clientY); freeD += ' L '+p.x+' '+p.y; freePath.setAttribute('d', freeD); freeLast=p; }
+    function updateFree(e){ 
+    if(!freePath) return; 
+    var p=svgPoint(e.clientX, e.clientY); 
+    freeD += ' L '+p.x+' '+p.y; 
+    freePath.setAttribute('d', freeD); 
+    freeLast=p; 
+    updateFreeMagnifier(e);
+  }
   function endFree(e){ if(!freePath) return; var last = freeLast || freeStart; var dist=Math.hypot(last.x-freeStart.x, last.y-freeStart.y); if(dist<24 && freeD.split('L').length>6){
   freeD += ' Z';
   freePath.setAttribute('d', freeD);
