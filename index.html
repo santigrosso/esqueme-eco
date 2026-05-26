@@ -1109,7 +1109,22 @@ updatePedretReference(null);
   } 
 }
   if(gradoMode){ gradoMode.addEventListener('click', function(e){ var b=e.target && e.target.closest ? e.target.closest('button[data-mode]') : null; if(!b) return; Array.prototype.slice.call(gradoMode.querySelectorAll('button')).forEach(function(x){ x.classList.remove('active'); }); b.classList.add('active'); renderGrado(b.getAttribute('data-mode')); }); }
+if(gradoOptions){
 
+  gradoOptions.addEventListener('change', function(e){
+
+    var input =
+      e.target && e.target.closest
+      ? e.target.closest('input[name="grado"]')
+      : null;
+
+    if(!input) return;
+
+    updatePedretReference(input.value);
+
+  });
+
+}
   // ===== TESTS mín. y limpieza =====
   function assert(cond,msg){ if(!cond){ console.error('[TEST FAIL]',msg); return false;} console.log('[TEST OK]',msg); return true; }
   var tests=[ function(){ return assert(!!document.getElementById('tabs'),'Existe barra de tabs'); } ];
