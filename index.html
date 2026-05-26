@@ -64,7 +64,7 @@
   .segbox{display:inline-flex;border:1px solid #b9c6d9;border-radius:.6rem;overflow:hidden}
   .segbox button{padding:.35rem .65rem;border:0;background:#f6f8fb;color:#0e1320;font-weight:700}
   .segbox button.active{background:#e8eef7}
-  .cards{display:grid;grid-template-columns:repeat(4,minmax(260px,1fr));gap:1rem;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+  .cards{display:grid;grid-template-columns:repeat(3,minmax(300px,1fr));gap:1rem;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
   .card{border:1px solid var(--line);border-radius:.9rem;background:#fff;padding:.9rem;text-align:left}
   .card h3{text-transform:uppercase;margin:.1rem 0 .6rem 0;font-size:.95rem;color:#1b2435;text-align:center}
   .opt{display:grid;gap:.6rem}
@@ -417,15 +417,6 @@
           <label><input type="checkbox" value="Colección"> Colección</label>
           <label><input type="checkbox" value="Cicatriz fibrosa"> Cicatriz fibrosa</label>
           <label><input type="checkbox" value="Calcificaciones"> Calcificaciones</label>
-        </div>
-      </div>
-            <div class="card" id="cardClasificacionGemelos" style="display:none;">
-        <h3>Clasificación específica</h3>
-        <div class="opt" id="optClasificacionGemelos">
-          <label><input type="radio" name="clasificacionGemelos" value="Pedret tipo 1"> Pedret tipo 1</label>
-          <label><input type="radio" name="clasificacionGemelos" value="Pedret tipo 2"> Pedret tipo 2</label>
-          <label><input type="radio" name="clasificacionGemelos" value="Pedret tipo 3"> Pedret tipo 3</label>
-          <label><input type="radio" name="clasificacionGemelos" value="Pedret tipo 4"> Pedret tipo 4</label>
         </div>
       </div>
     </div>
@@ -949,14 +940,9 @@ if(inpPhotoGal){
 
 
   // Tabs / Lado
-   var tabsEl = document.getElementById('tabs'); if(tabsEl){ tabsEl.addEventListener('click', function(e){ var t = e.target && e.target.closest ? e.target.closest('.tab') : null; if(!t) return; $$('#tabs .tab').forEach(function(o){ o.classList.remove('active'); }); t.classList.add('active'); musculo = t.getAttribute('data-musculo'); updateClasificacionGemelos(); clearPins(); clearFree(); clearLines(); clearLabels(); clearSelection(); loadSVG(); }); }
+  var tabsEl = document.getElementById('tabs'); if(tabsEl){ tabsEl.addEventListener('click', function(e){ var t = e.target && e.target.closest ? e.target.closest('.tab') : null; if(!t) return; $$('#tabs .tab').forEach(function(o){ o.classList.remove('active'); }); t.classList.add('active'); musculo = t.getAttribute('data-musculo'); clearPins(); clearFree(); clearLines(); clearLabels(); clearSelection(); loadSVG(); }); }
   var sideToggle = document.getElementById('sideToggle'); if(sideToggle){ sideToggle.addEventListener('click', function(ev){ var btn = ev.target && ev.target.closest ? ev.target.closest('button[data-side]') : null; if(!btn) return; Array.prototype.slice.call(sideToggle.querySelectorAll('button[data-side]')).forEach(function(b){ b.classList.remove('active'); }); btn.classList.add('active'); lado = btn.getAttribute('data-side'); clearPins(); clearFree(); clearLines(); clearLabels(); clearSelection(); loadSVG(); }); }
-  var cardClasificacionGemelos = document.getElementById('cardClasificacionGemelos');
 
-  function updateClasificacionGemelos(){
-    if(!cardClasificacionGemelos) return;
-    cardClasificacionGemelos.style.display = (musculo === 'gemelos') ? 'block' : 'none';
-  }
   var gradoMode = document.getElementById('gradoMode'); var gradoOptions = document.getElementById('gradoOptions'); var cardTejido = document.getElementById('cardTejido');
   function renderGrado(mode){ if(!gradoOptions) return; var html=''; gradoOptions.classList.remove('munich');
     if(mode==='munich'){
@@ -989,7 +975,7 @@ if(inpPhotoGal){
     clearSelection(); // evita overlay inicial
   }catch(_){}
 
-    loadSVG(); applyColorChip(); setTool(null); renderGrado('bamic'); updateClasificacionGemelos();
+  loadSVG(); applyColorChip(); setTool(null); renderGrado('bamic');
 })();
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
