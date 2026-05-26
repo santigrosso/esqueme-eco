@@ -996,6 +996,74 @@ updateGradoModes(); }); }
     renderGrado('bamic');
   }
 }
+  function updatePedretReference(value){
+
+  var img = document.getElementById('pedretRefImg');
+  var txt = document.getElementById('pedretRefText');
+
+  if(!img || !txt) return;
+
+  var data = {
+
+    'Tipo 1 — Mioaponeurótica': {
+      img: 'img/pedret/pedret-tipo1.JPG',
+      text:
+`TIPO 1
+Lesión de la UMT distal.
+Aponeurosis del gemelo intacta.
+Poco o nada de hematoma.`
+    },
+
+    'Tipo 2A — Aponeurótica parcial (<50%)': {
+      img: 'img/pedret/pedret-tipo2a.JPG',
+      text:
+`TIPO 2a
+Rotura parcial de la aponeurosis del gemelo.
+<50% del ancho comprometido.
+Hematoma leve/moderado.
+Sincronía generalmente preservada.`
+    },
+
+    'Tipo 2B — Aponeurótica extensa (>50%)': {
+      img: 'img/pedret/pedret-tipo2b.JPG',
+      text:
+`TIPO 2b
+Rotura amplia de la aponeurosis del gemelo.
+50% del ancho comprometido.
+Hematoma importante.
+Asincronía gastrocnemio-sóleo frecuente.`
+    },
+
+    'Tipo 3 — Aponeurosis libre del gemelo (FGA)': {
+      img: 'img/pedret/pedret-tipo3.JPG',
+      text:
+`TIPO 3
+Lesión distal de la aponeurosis libre del gemelo.
+Poco edema y poco hematoma.
+Comportamiento “tendinoso”.`
+    },
+
+    'Tipo 4 — Mixta': {
+      img: 'img/pedret/pedret-tipo4.JPG',
+      text:
+`TIPO 4
+Lesión tipo 2b + tipo 3.
+Gran disrupción conectiva.
+Hematoma importante.
+Asincronía marcada.`
+    }
+
+  };
+
+  if(data[value]){
+    img.src = data[value].img;
+    txt.textContent = data[value].text;
+  } else {
+    img.src = 'img/pedret/pedret-ref.JPG';
+    txt.textContent =
+      'Seleccioná un tipo de lesión para ver la referencia correspondiente.';
+  }
+}
   function renderGrado(mode){ 
   if(!gradoOptions) return; 
   var html=''; 
