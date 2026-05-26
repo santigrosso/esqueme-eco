@@ -941,7 +941,10 @@ if(inpPhotoGal){
 
 
   // Tabs / Lado
-  var tabsEl = document.getElementById('tabs'); if(tabsEl){ tabsEl.addEventListener('click', function(e){ var t = e.target && e.target.closest ? e.target.closest('.tab') : null; if(!t) return; $$('#tabs .tab').forEach(function(o){ o.classList.remove('active'); }); t.classList.add('active'); musculo = t.getAttribute('data-musculo'); clearPins(); clearFree(); clearLines(); clearLabels(); clearSelection(); loadSVG(); }); }
+  var tabsEl = document.getElementById('tabs'); if(tabsEl){ tabsEl.addEventListener('click', function(e){ var t = e.target && e.target.closest ? e.target.closest('.tab') : null; if(!t) return; $$('#tabs .tab').forEach(function(o){ o.classList.remove('active'); }); t.classList.add('active'); musculo = t.getAttribute('data-musculo'); 
+clearPins(); clearFree(); clearLines(); clearLabels(); clearSelection(); 
+loadSVG(); 
+updateGradoModes(); }); }
   var sideToggle = document.getElementById('sideToggle'); if(sideToggle){ sideToggle.addEventListener('click', function(ev){ var btn = ev.target && ev.target.closest ? ev.target.closest('button[data-side]') : null; if(!btn) return; Array.prototype.slice.call(sideToggle.querySelectorAll('button[data-side]')).forEach(function(b){ b.classList.remove('active'); }); btn.classList.add('active'); lado = btn.getAttribute('data-side'); clearPins(); clearFree(); clearLines(); clearLabels(); clearSelection(); loadSVG(); }); }
 
   var gradoMode = document.getElementById('gradoMode'); var gradoOptions = document.getElementById('gradoOptions'); var cardTejido = document.getElementById('cardTejido');
