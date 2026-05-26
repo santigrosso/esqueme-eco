@@ -385,9 +385,10 @@
     <h2>Características de la lesión</h2>
     <div class="gradoModeWrap">
       <div id="gradoMode" class="segbox" role="tablist" aria-label="Selector de sistema de grado">
-        <button type="button" class="active" data-mode="bamic">BAMIC</button>
-        <button type="button" data-mode="munich">MUNICH</button>
-        <button type="button" data-mode="clasica">CLÁSICA</button>
+       <button type="button" class="active" data-mode="pedret">PEDRET</button>
+<button type="button" data-mode="bamic">BAMIC</button>
+<button type="button" data-mode="munich">MUNICH</button>
+<button type="button" data-mode="clasica">CLÁSICA</button>
       </div>
     </div>
 
@@ -944,25 +945,45 @@ if(inpPhotoGal){
   var sideToggle = document.getElementById('sideToggle'); if(sideToggle){ sideToggle.addEventListener('click', function(ev){ var btn = ev.target && ev.target.closest ? ev.target.closest('button[data-side]') : null; if(!btn) return; Array.prototype.slice.call(sideToggle.querySelectorAll('button[data-side]')).forEach(function(b){ b.classList.remove('active'); }); btn.classList.add('active'); lado = btn.getAttribute('data-side'); clearPins(); clearFree(); clearLines(); clearLabels(); clearSelection(); loadSVG(); }); }
 
   var gradoMode = document.getElementById('gradoMode'); var gradoOptions = document.getElementById('gradoOptions'); var cardTejido = document.getElementById('cardTejido');
-  function renderGrado(mode){ if(!gradoOptions) return; var html=''; gradoOptions.classList.remove('munich');
-    if(mode==='munich'){
-      html += '\n<label><input type="radio" name="grado" value="Lesión parcial menor (3A)"> Lesión parcial menor (3A)</label>';
-      html += '\n<label><input type="radio" name="grado" value="Lesión parcial moderada (3B)"> Lesión parcial moderada (3B)</label>';
-      html += '\n<label><input type="radio" name="grado" value="Lesión muscular subtotal o total (4)"> Lesión muscular subtotal o total (4)</label>';
-      html += '\n<label><input type="radio" name="grado" value="Lesión total del tendón / Avulsión (4)"> Lesión total del tendón / Avulsión (4)</label>';
-      gradoOptions.innerHTML=html; cardTejido.style.display='none'; gradoOptions.classList.add('munich');
-    } else if(mode==='clasica'){
-      html += '\n<label><input type="radio" name="grado" value="Grado I"> Grado I</label>';
-      html += '\n<label><input type="radio" name="grado" value="Grado II"> Grado II</label>';
-      html += '\n<label><input type="radio" name="grado" value="Grado III"> Grado III</label>';
-      gradoOptions.innerHTML=html; cardTejido.style.display='none';
-    } else {
-      html += '\n<label><input type="radio" name="grado" value="Grado 1"> Grado 1</label>';
-      html += '\n<label><input type="radio" name="grado" value="Grado 2"> Grado 2</label>';
-      html += '\n<label><input type="radio" name="grado" value="Grado 3"> Grado 3</label>';
-      html += '\n<label><input type="radio" name="grado" value="Grado 4"> Grado 4</label>';
-      gradoOptions.innerHTML=html; cardTejido.style.display='block';
-    } }
+ function renderGrado(mode){ 
+  if(!gradoOptions) return; 
+  var html=''; 
+  gradoOptions.classList.remove('munich');
+
+  if(mode==='pedret'){
+    html += '\n<label><input type="radio" name="grado" value="Tipo 1 — Mioaponeurótica"> Tipo 1 — Mioaponeurótica</label>';
+    html += '\n<label><input type="radio" name="grado" value="Tipo 2A — Aponeurótica parcial (<50%)"> Tipo 2A — Aponeurótica parcial (&lt;50%)</label>';
+    html += '\n<label><input type="radio" name="grado" value="Tipo 2B — Aponeurótica extensa (>50%)"> Tipo 2B — Aponeurótica extensa (&gt;50%)</label>';
+    html += '\n<label><input type="radio" name="grado" value="Tipo 3 — Aponeurosis libre del gemelo (FGA)"> Tipo 3 — Aponeurosis libre del gemelo (FGA)</label>';
+    html += '\n<label><input type="radio" name="grado" value="Tipo 4 — Mixta"> Tipo 4 — Mixta</label>';
+    gradoOptions.innerHTML=html; 
+    cardTejido.style.display='none';
+    document.querySelector('#cardGrado h3').textContent = 'Clasificación gemelo medial';
+
+  } else if(mode==='munich'){
+    document.querySelector('#cardGrado h3').textContent = 'Grado';
+    html += '\n<label><input type="radio" name="grado" value="Lesión parcial menor (3A)"> Lesión parcial menor (3A)</label>';
+    html += '\n<label><input type="radio" name="grado" value="Lesión parcial moderada (3B)"> Lesión parcial moderada (3B)</label>';
+    html += '\n<label><input type="radio" name="grado" value="Lesión muscular subtotal o total (4)"> Lesión muscular subtotal o total (4)</label>';
+    html += '\n<label><input type="radio" name="grado" value="Lesión total del tendón / Avulsión (4)"> Lesión total del tendón / Avulsión (4)</label>';
+    gradoOptions.innerHTML=html; cardTejido.style.display='none'; gradoOptions.classList.add('munich');
+
+  } else if(mode==='clasica'){
+    document.querySelector('#cardGrado h3').textContent = 'Grado';
+    html += '\n<label><input type="radio" name="grado" value="Grado I"> Grado I</label>';
+    html += '\n<label><input type="radio" name="grado" value="Grado II"> Grado II</label>';
+    html += '\n<label><input type="radio" name="grado" value="Grado III"> Grado III</label>';
+    gradoOptions.innerHTML=html; cardTejido.style.display='none';
+
+  } else {
+    document.querySelector('#cardGrado h3').textContent = 'Grado';
+    html += '\n<label><input type="radio" name="grado" value="Grado 1"> Grado 1</label>';
+    html += '\n<label><input type="radio" name="grado" value="Grado 2"> Grado 2</label>';
+    html += '\n<label><input type="radio" name="grado" value="Grado 3"> Grado 3</label>';
+    html += '\n<label><input type="radio" name="grado" value="Grado 4"> Grado 4</label>';
+    gradoOptions.innerHTML=html; cardTejido.style.display='block';
+  } 
+}
   if(gradoMode){ gradoMode.addEventListener('click', function(e){ var b=e.target && e.target.closest ? e.target.closest('button[data-mode]') : null; if(!b) return; Array.prototype.slice.call(gradoMode.querySelectorAll('button')).forEach(function(x){ x.classList.remove('active'); }); b.classList.add('active'); renderGrado(b.getAttribute('data-mode')); }); }
 
   // ===== TESTS mín. y limpieza =====
@@ -975,7 +996,7 @@ if(inpPhotoGal){
     clearSelection(); // evita overlay inicial
   }catch(_){}
 
-  loadSVG(); applyColorChip(); setTool(null); renderGrado('bamic');
+ loadSVG(); applyColorChip(); setTool(null); renderGrado('pedret');
 })();
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
