@@ -945,7 +945,25 @@ if(inpPhotoGal){
   var sideToggle = document.getElementById('sideToggle'); if(sideToggle){ sideToggle.addEventListener('click', function(ev){ var btn = ev.target && ev.target.closest ? ev.target.closest('button[data-side]') : null; if(!btn) return; Array.prototype.slice.call(sideToggle.querySelectorAll('button[data-side]')).forEach(function(b){ b.classList.remove('active'); }); btn.classList.add('active'); lado = btn.getAttribute('data-side'); clearPins(); clearFree(); clearLines(); clearLabels(); clearSelection(); loadSVG(); }); }
 
   var gradoMode = document.getElementById('gradoMode'); var gradoOptions = document.getElementById('gradoOptions'); var cardTejido = document.getElementById('cardTejido');
- function renderGrado(mode){ 
+ function updateGradoModes(){
+  if(!gradoMode) return;
+
+  var pedretBtn = gradoMode.querySelector('button[data-mode="pedret"]');
+  var bamicBtn  = gradoMode.querySelector('button[data-mode="bamic"]');
+
+  if(musculo === 'gemelos'){
+    pedretBtn.style.display = '';
+    gradoMode.querySelectorAll('button').forEach(function(b){ b.classList.remove('active'); });
+    pedretBtn.classList.add('active');
+    renderGrado('pedret');
+  } else {
+    pedretBtn.style.display = 'none';
+    gradoMode.querySelectorAll('button').forEach(function(b){ b.classList.remove('active'); });
+    bamicBtn.classList.add('active');
+    renderGrado('bamic');
+  }
+}
+  function renderGrado(mode){ 
   if(!gradoOptions) return; 
   var html=''; 
   gradoOptions.classList.remove('munich');
