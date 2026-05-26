@@ -1082,6 +1082,7 @@ Asincronía marcada.`
 updatePedretReference(null);
 
   } else if(mode==='munich'){
+    document.getElementById('cardPedretRef').style.display = 'none';
     document.querySelector('#cardGrado h3').textContent = 'Grado';
     html += '\n<label><input type="radio" name="grado" value="Lesión parcial menor (3A)"> Lesión parcial menor (3A)</label>';
     html += '\n<label><input type="radio" name="grado" value="Lesión parcial moderada (3B)"> Lesión parcial moderada (3B)</label>';
@@ -1090,6 +1091,7 @@ updatePedretReference(null);
     gradoOptions.innerHTML=html; cardTejido.style.display='none'; gradoOptions.classList.add('munich');
 
   } else if(mode==='clasica'){
+    document.getElementById('cardPedretRef').style.display = 'none';
     document.querySelector('#cardGrado h3').textContent = 'Grado';
     html += '\n<label><input type="radio" name="grado" value="Grado I"> Grado I</label>';
     html += '\n<label><input type="radio" name="grado" value="Grado II"> Grado II</label>';
@@ -1097,6 +1099,7 @@ updatePedretReference(null);
     gradoOptions.innerHTML=html; cardTejido.style.display='none';
 
   } else {
+    document.getElementById('cardPedretRef').style.display = 'none';
     document.querySelector('#cardGrado h3').textContent = 'Grado';
     html += '\n<label><input type="radio" name="grado" value="Grado 1"> Grado 1</label>';
     html += '\n<label><input type="radio" name="grado" value="Grado 2"> Grado 2</label>';
