@@ -1190,7 +1190,27 @@ if(gradoOptions){
     updatePedretReference(input.value);
 
   });
+var pedretHelpBtn = document.getElementById('pedretHelpBtn');
+var pedretHelpPopup = document.getElementById('pedretHelpPopup');
 
+if(pedretHelpBtn && pedretHelpPopup){
+  pedretHelpBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    pedretHelpPopup.classList.toggle('open');
+    pedretHelpPopup.setAttribute(
+      'aria-hidden',
+      pedretHelpPopup.classList.contains('open') ? 'false' : 'true'
+    );
+  });
+
+  document.addEventListener('click', function(e){
+    if(!pedretHelpPopup.classList.contains('open')) return;
+    if(e.target === pedretHelpBtn || pedretHelpPopup.contains(e.target)) return;
+
+    pedretHelpPopup.classList.remove('open');
+    pedretHelpPopup.setAttribute('aria-hidden','true');
+  });
+}
 }
   // ===== TESTS mín. y limpieza =====
   function assert(cond,msg){ if(!cond){ console.error('[TEST FAIL]',msg); return false;} console.log('[TEST OK]',msg); return true; }
