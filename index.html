@@ -429,16 +429,20 @@
           <label><input type="checkbox" value="Intramuscular"> Intramuscular</label>
         </div>
       </div>
-      <div class="card" id="cardPedretRef">
+    <div class="card" id="cardPedretRef">
   <h3>Referencia</h3>
+
+  <div class="pedret-ref-head">
+    <span id="pedretRefTitle">Referencia general</span>
+    <button type="button" id="pedretHelpBtn" class="pedret-help-btn">?</button>
+  </div>
 
   <img id="pedretRefImg"
        src="img/pedret/pedret-ref.jpg"
        alt="Referencia Pedret">
 
-  <div id="pedretRefText">
-    Seleccioná un tipo de lesión para ver la referencia correspondiente.
-  </div>
+  <div id="pedretHelpPopup" class="pedret-help-popup" aria-hidden="true"></div>
+</div>
 </div>
       <div class="card" id="cardAsociadas">
         <h3>Lesiones asociadas</h3>
