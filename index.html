@@ -1049,53 +1049,66 @@ updateGradoModes(); }); }
     renderGrado('bamic');
   }
 }
-  function updatePedretReference(value){
+var currentPedretDescription = '';
+
+function updatePedretReference(value){
 
   var img = document.getElementById('pedretRefImg');
-  var txt = document.getElementById('pedretRefText');
+  var title = document.getElementById('pedretRefTitle');
+  var popup = document.getElementById('pedretHelpPopup');
 
-  if(!img || !txt) return;
+  if(!img || !title || !popup) return;
 
   var data = {
 
     'Tipo 1 — Mioaponeurótica': {
+      label: 'Tipo 1',
       img: 'img/pedret/pedret-tipo1.jpg',
       text:
-`Lesión de la UMT distal.
+`TIPO 1
+Lesión de la UMT distal.
 Aponeurosis del gemelo intacta.
 Poco o nada de hematoma.`
     },
 
-    'Tipo 2A — Aponeurótica parcial': {
+    'Tipo 2A — Aponeurótica parcial (<50%)': {
+      label: 'Tipo 2a',
       img: 'img/pedret/pedret-tipo2a.jpg',
       text:
-`Rotura parcial de la aponeurosis del gemelo.
+`TIPO 2a
+Rotura parcial de la aponeurosis del gemelo.
 <50% del ancho comprometido.
 Hematoma leve/moderado.
 Sincronía generalmente preservada.`
     },
 
-    'Tipo 2B — Aponeurótica extensa': {
+    'Tipo 2B — Aponeurótica extensa (>50%)': {
+      label: 'Tipo 2b',
       img: 'img/pedret/pedret-tipo2b.jpg',
       text:
-`Rotura amplia de la aponeurosis del gemelo.
+`TIPO 2b
+Rotura amplia de la aponeurosis del gemelo.
 50% del ancho comprometido.
 Hematoma importante.
 Asincronía gastrocnemio-sóleo frecuente.`
     },
 
-    'Tipo 3 — Aponeurosis libre': {
+    'Tipo 3 — Aponeurosis libre del gemelo (FGA)': {
+      label: 'Tipo 3',
       img: 'img/pedret/pedret-tipo3.jpg',
       text:
-`Lesión distal de la aponeurosis libre.
+`TIPO 3
+Lesión distal de la aponeurosis libre del gemelo.
 Poco edema y poco hematoma.
 Comportamiento “tendinoso”.`
     },
 
     'Tipo 4 — Mixta': {
+      label: 'Tipo 4',
       img: 'img/pedret/pedret-tipo4.jpg',
       text:
-`Lesión tipo 2b + tipo 3.
+`TIPO 4
+Lesión tipo 2b + tipo 3.
 Gran disrupción conectiva.
 Hematoma importante.
 Asincronía marcada.`
@@ -1103,13 +1116,19 @@ Asincronía marcada.`
 
   };
 
+  popup.classList.remove('open');
+  popup.setAttribute('aria-hidden','true');
+
   if(data[value]){
     img.src = data[value].img;
-    txt.textContent = data[value].text;
+    title.textContent = data[value].label;
+    currentPedretDescription = data[value].text;
+    popup.textContent = currentPedretDescription;
   } else {
     img.src = 'img/pedret/pedret-ref.jpg';
-    txt.textContent =
-      'Seleccioná un tipo de lesión para ver la referencia correspondiente.';
+    title.textContent = 'Referencia general';
+    currentPedretDescription = 'Seleccioná un tipo de lesión para ver la referencia correspondiente.';
+    popup.textContent = currentPedretDescription;
   }
 }
   function renderGrado(mode){ 
