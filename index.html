@@ -256,21 +256,71 @@
 }
 #cardPedretRef{
   display:none;
+  position:relative;
 }
+
+.pedret-ref-head{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:.4rem;
+  margin-bottom:.45rem;
+  font-weight:700;
+  color:#1b2435;
+}
+
+.pedret-help-btn{
+  width:20px;
+  height:20px;
+  border-radius:50%;
+  border:1px solid #8fa7c7;
+  background:#e8eef7;
+  color:#1F2D53;
+  font-weight:800;
+  font-size:.75rem;
+  line-height:1;
+  cursor:pointer;
+}
+
 #pedretRefImg{
   width:100%;
   max-height:180px;
   object-fit:contain;
   display:block;
-  margin:0 auto .6rem auto;
+  margin:0 auto;
   border-radius:.6rem;
 }
 
-#pedretRefText{
-  font-size:.88rem;
-  line-height:1.35;
+.pedret-help-popup{
+  display:none;
+  position:absolute;
+  left:.75rem;
+  right:.75rem;
+  top:3.9rem;
+  z-index:20;
+
+  background:#ffffff;
+  border:1px solid #b9c6d9;
+  border-radius:.65rem;
+  padding:.65rem .75rem;
+
+  font-size:.82rem;
+  line-height:1.25;
   color:#1b2435;
   white-space:pre-line;
+
+  box-shadow:0 8px 24px rgba(0,0,0,.18);
+}
+
+.pedret-help-popup.open{
+  display:block;
+}
+
+@media print{
+  .pedret-help-btn,
+  .pedret-help-popup{
+    display:none!important;
+  }
 }
 </style>
 
