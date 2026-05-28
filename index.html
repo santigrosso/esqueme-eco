@@ -316,6 +316,29 @@
   display:block;
 }
 
+
+/* ===== Popup con imagen para referencia T-junction ===== */
+.pedret-help-popup img.tjunction-table-img{
+  width:100%;
+  max-height:420px;
+  object-fit:contain;
+  display:block;
+  border-radius:.45rem;
+}
+
+#cardPedretRef.tjunction-ref #pedretRefImg{
+  max-height:180px;
+}
+
+#cardPedretRef.tjunction-ref .pedret-help-popup{
+  top:3.9rem;
+  left:.5rem;
+  right:.5rem;
+  max-height:480px;
+  overflow:auto;
+  padding:.5rem;
+}
+
 @media print{
   .pedret-help-btn,
   .pedret-help-popup{
@@ -1041,6 +1064,10 @@ updateGradoModes(); }); }
     gradoMode.querySelectorAll('button').forEach(function(b){ b.classList.remove('active'); });
     pedretBtn.classList.add('active');
     renderGrado('pedret');
+  } else if(musculo === 't-junction'){
+    pedretBtn.style.display = 'none';
+    gradoMode.querySelectorAll('button').forEach(function(b){ b.classList.remove('active'); });
+    renderGrado('tjunction');
   } else {
     pedretBtn.style.display = 'none';
     gradoMode.querySelectorAll('button').forEach(function(b){ b.classList.remove('active'); });
@@ -1130,12 +1157,57 @@ Asincronía marcada.`
     popup.textContent = currentPedretDescription;
   }
 }
+
+function updateTJunctionReference(){
+  var card = document.getElementById('cardPedretRef');
+  var img = document.getElementById('pedretRefImg');
+  var title = document.getElementById('pedretRefTitle');
+  var popup = document.getElementById('pedretHelpPopup');
+
+  if(!card || !img || !title || !popup) return;
+
+  card.classList.add('tjunction-ref');
+  img.src = 'img/t-junction/t-junction-ref.jpg';
+  img.alt = 'Referencia T-junction';
+  title.textContent = 'Referencia T-junction';
+
+  popup.classList.remove('open');
+  popup.setAttribute('aria-hidden','true');
+  popup.innerHTML = '<img class="tjunction-table-img" src="img/t-junction/t-junction-tabla.jpg" alt="Tabla clasificación T-junction">';
+}
+
+function clearReferenceCardMode(){
+  var card = document.getElementById('cardPedretRef');
+  var popup = document.getElementById('pedretHelpPopup');
+  if(card) card.classList.remove('tjunction-ref');
+  if(popup){
+    popup.classList.remove('open');
+    popup.setAttribute('aria-hidden','true');
+    popup.innerHTML = '';
+    popup.textContent = '';
+  }
+}
+
   function renderGrado(mode){ 
   if(!gradoOptions) return; 
   var html=''; 
   gradoOptions.classList.remove('munich');
 
-  if(mode==='pedret'){
+  if(mode==='tjunction'){
+    clearReferenceCardMode();
+    html += '\n<label><input type="radio" name="grado" value="Subtipo 1"> Subtipo 1</label>';
+    html += '\n<label><input type="radio" name="grado" value="Subtipo 2"> Subtipo 2</label>';
+    html += '\n<label><input type="radio" name="grado" value="Subtipo 3"> Subtipo 3</label>';
+    html += '\n<label><input type="radio" name="grado" value="Subtipo 4"> Subtipo 4</label>';
+    html += '\n<label><input type="radio" name="grado" value="Subtipo 5"> Subtipo 5</label>';
+    gradoOptions.innerHTML=html;
+    cardTejido.style.display='none';
+    document.querySelector('#cardGrado h3').textContent = 'Clasificación T-junction';
+    document.getElementById('cardPedretRef').style.display = 'block';
+    updateTJunctionReference();
+
+  } else if(mode==='pedret'){
+    clearReferenceCardMode();
     html += '\n<label><input type="radio" name="grado" value="Tipo 1 — Mioaponeurótica"> Tipo 1 — Mioaponeurótica</label>';
     html += '\n<label><input type="radio" name="grado" value="Tipo 2A — Aponeurótica parcial"> Tipo 2A — Aponeurótica parcial</label>';
     html += '\n<label><input type="radio" name="grado" value="Tipo 2B — Aponeurótica extensa"> Tipo 2B — Aponeurótica extensa</label>';
@@ -1148,6 +1220,7 @@ Asincronía marcada.`
 updatePedretReference(null);
 
   } else if(mode==='munich'){
+    clearReferenceCardMode();
     document.getElementById('cardPedretRef').style.display = 'none';
     document.querySelector('#cardGrado h3').textContent = 'Grado';
     html += '\n<label><input type="radio" name="grado" value="Lesión parcial menor (3A)"> Lesión parcial menor (3A)</label>';
@@ -1157,6 +1230,7 @@ updatePedretReference(null);
     gradoOptions.innerHTML=html; cardTejido.style.display='none'; gradoOptions.classList.add('munich');
 
   } else if(mode==='clasica'){
+    clearReferenceCardMode();
     document.getElementById('cardPedretRef').style.display = 'none';
     document.querySelector('#cardGrado h3').textContent = 'Grado';
     html += '\n<label><input type="radio" name="grado" value="Grado I"> Grado I</label>';
@@ -1165,6 +1239,7 @@ updatePedretReference(null);
     gradoOptions.innerHTML=html; cardTejido.style.display='none';
 
   } else {
+    clearReferenceCardMode();
     document.getElementById('cardPedretRef').style.display = 'none';
     document.querySelector('#cardGrado h3').textContent = 'Grado';
     html += '\n<label><input type="radio" name="grado" value="Grado 1"> Grado 1</label>';
@@ -1186,7 +1261,9 @@ if(gradoOptions){
 
     if(!input) return;
 
-    updatePedretReference(input.value);
+    if(musculo === 'gemelos'){
+      updatePedretReference(input.value);
+    }
 
   });
 var pedretHelpBtn = document.getElementById('pedretHelpBtn');
