@@ -339,9 +339,60 @@
   padding:.5rem;
 }
 
+
+/* ===== Ayuda clasificación T-junction / CRONIN ===== */
+.card-title-help{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:.4rem;
+  position:relative;
+}
+.card-title-help h3{ margin:.1rem 0 .6rem 0; }
+.classif-help-btn{
+  width:20px;
+  height:20px;
+  border-radius:50%;
+  border:1px solid #8fa7c7;
+  background:#e8eef7;
+  color:#1F2D53;
+  font-weight:800;
+  font-size:.75rem;
+  line-height:1;
+  cursor:pointer;
+  display:none;
+  margin-top:-.45rem;
+}
+.classif-help-popup{
+  display:none;
+  position:fixed;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:min(860px,92vw);
+  z-index:2147483600;
+  background:#fff;
+  border:1px solid #b9c6d9;
+  border-radius:.75rem;
+  padding:.65rem;
+  box-shadow:0 18px 48px rgba(0,0,0,.32);
+  max-height:82vh;
+  overflow:auto;
+}
+.classif-help-popup.open{ display:block; }
+.classif-help-popup img{
+  width:100%;
+  max-height:78vh;
+  object-fit:contain;
+  display:block;
+  border-radius:.45rem;
+}
+
 @media print{
   .pedret-help-btn,
-  .pedret-help-popup{
+  .pedret-help-popup,
+  .classif-help-btn,
+  .classif-help-popup{
     display:none!important;
   }
 }
@@ -477,6 +528,7 @@
     <div class="gradoModeWrap">
       <div id="gradoMode" class="segbox" role="tablist" aria-label="Selector de sistema de grado">
        <button type="button" class="active" data-mode="pedret">PEDRET</button>
+<button type="button" data-mode="cronin">CRONIN</button>
 <button type="button" data-mode="bamic">BAMIC</button>
 <button type="button" data-mode="munich">MUNICH</button>
 <button type="button" data-mode="clasica">CLÁSICA</button>
@@ -485,7 +537,11 @@
 
     <div class="cards">
       <div class="card" id="cardGrado">
-        <h3>Grado</h3>
+        <div class="card-title-help">
+          <h3>Grado</h3>
+          <button type="button" id="classifHelpBtn" class="classif-help-btn">?</button>
+          <div id="classifHelpPopup" class="classif-help-popup" aria-hidden="true"></div>
+        </div>
         <div class="opt" id="gradoOptions" aria-live="polite">
           <label><input type="radio" name="grado" value="Grado 1"> Grado 1</label>
           <label><input type="radio" name="grado" value="Grado 2"> Grado 2</label>
@@ -1057,19 +1113,24 @@ updateGradoModes(); }); }
   if(!gradoMode) return;
 
   var pedretBtn = gradoMode.querySelector('button[data-mode="pedret"]');
+  var croninBtn = gradoMode.querySelector('button[data-mode="cronin"]');
   var bamicBtn  = gradoMode.querySelector('button[data-mode="bamic"]');
 
   if(musculo === 'gemelos'){
     pedretBtn.style.display = '';
+    croninBtn.style.display = 'none';
     gradoMode.querySelectorAll('button').forEach(function(b){ b.classList.remove('active'); });
     pedretBtn.classList.add('active');
     renderGrado('pedret');
   } else if(musculo === 't-junction'){
     pedretBtn.style.display = 'none';
+    croninBtn.style.display = '';
     gradoMode.querySelectorAll('button').forEach(function(b){ b.classList.remove('active'); });
-    renderGrado('tjunction');
+    croninBtn.classList.add('active');
+    renderGrado('cronin');
   } else {
     pedretBtn.style.display = 'none';
+    croninBtn.style.display = 'none';
     gradoMode.querySelectorAll('button').forEach(function(b){ b.classList.remove('active'); });
     bamicBtn.classList.add('active');
     renderGrado('bamic');
@@ -1158,7 +1219,7 @@ Asincronía marcada.`
   }
 }
 
-function updateTJunctionReference(){
+function updateTJunctionReference(value){
   var card = document.getElementById('cardPedretRef');
   var img = document.getElementById('pedretRefImg');
   var title = document.getElementById('pedretRefTitle');
@@ -1167,24 +1228,93 @@ function updateTJunctionReference(){
   if(!card || !img || !title || !popup) return;
 
   card.classList.add('tjunction-ref');
-  img.src = 'img/t-junction/t-junction-ref.jpg';
   img.alt = 'Referencia T-junction';
-  title.textContent = 'Referencia T-junction';
+
+  var data = {
+    'Subtipo 1': {
+      label: 'Subtipo 1',
+      img: 'img/t-junction/t-junction-subtipo1.jpg',
+      text:
+`SUBTIPO 1
+• Discontinuidad limitada al componente mioaponeurótico profundo.
+• Componente mio-tendinoso superficial conservado.
+• Sin extensión miofascial ni hematoma.
+• Sincronía dinámica preservada entre ambas cabezas.`
+    },
+    'Subtipo 2': {
+      label: 'Subtipo 2',
+      img: 'img/t-junction/t-junction-subtipo2.jpg',
+      text:
+`SUBTIPO 2
+• Compromiso del componente mioaponeurótico profundo.
+• Extensión hacia tejido miofascial.
+• Componente mio-tendinoso superficial conservado.
+• Sin hematoma.
+• Sincronía dinámica preservada.`
+    },
+    'Subtipo 3': {
+      label: 'Subtipo 3',
+      img: 'img/t-junction/t-junction-subtipo3.jpg',
+      text:
+`SUBTIPO 3
+• Compromiso combinado mioaponeurótico y mio-tendinoso.
+• Presencia de extensión miofascial.
+• Sin hematoma intermuscular.
+• Sincronía dinámica conservada.`
+    },
+    'Subtipo 4': {
+      label: 'Subtipo 4',
+      img: 'img/t-junction/t-junction-subtipo4.jpg',
+      text:
+`SUBTIPO 4
+• Lesión multicapa con compromiso mioaponeurótico y mio-tendinoso.
+• Extensión miofascial asociada.
+• Presencia de hematoma intermuscular.
+• Sincronía dinámica preservada.`
+    },
+    'Subtipo 5': {
+      label: 'Subtipo 5',
+      img: 'img/t-junction/t-junction-subtipo5.jpg',
+      text:
+`SUBTIPO 5
+• Lesión multicapa con extensión miofascial y hematoma.
+• Compromiso mioaponeurótico y mio-tendinoso.
+• Movimiento asincrónico entre cabeza larga y corta.
+• Presencia de “gapping” dinámico durante la contracción.`
+    }
+  };
 
   popup.classList.remove('open');
   popup.setAttribute('aria-hidden','true');
-  popup.innerHTML = '<img class="tjunction-table-img" src="img/t-junction/t-junction-tabla.jpg" alt="Tabla clasificación T-junction">';
+
+  if(data[value]){
+    img.src = data[value].img;
+    title.textContent = data[value].label;
+    popup.textContent = data[value].text;
+  } else {
+    img.src = 'img/t-junction/t-junction-ref.jpg';
+    title.textContent = 'Referencia general';
+    popup.textContent = 'Seleccioná un subtipo para ver la referencia correspondiente.';
+  }
 }
 
 function clearReferenceCardMode(){
   var card = document.getElementById('cardPedretRef');
   var popup = document.getElementById('pedretHelpPopup');
+  var classifBtn = document.getElementById('classifHelpBtn');
+  var classifPopup = document.getElementById('classifHelpPopup');
   if(card) card.classList.remove('tjunction-ref');
   if(popup){
     popup.classList.remove('open');
     popup.setAttribute('aria-hidden','true');
     popup.innerHTML = '';
     popup.textContent = '';
+  }
+  if(classifBtn) classifBtn.style.display = 'none';
+  if(classifPopup){
+    classifPopup.classList.remove('open');
+    classifPopup.setAttribute('aria-hidden','true');
+    classifPopup.innerHTML = '';
   }
 }
 
@@ -1193,7 +1323,7 @@ function clearReferenceCardMode(){
   var html=''; 
   gradoOptions.classList.remove('munich');
 
-  if(mode==='tjunction'){
+  if(mode==='cronin'){
     clearReferenceCardMode();
     html += '\n<label><input type="radio" name="grado" value="Subtipo 1"> Subtipo 1</label>';
     html += '\n<label><input type="radio" name="grado" value="Subtipo 2"> Subtipo 2</label>';
@@ -1203,8 +1333,12 @@ function clearReferenceCardMode(){
     gradoOptions.innerHTML=html;
     cardTejido.style.display='none';
     document.querySelector('#cardGrado h3').textContent = 'Clasificación T-junction';
+    var classifBtn = document.getElementById('classifHelpBtn');
+    var classifPopup = document.getElementById('classifHelpPopup');
+    if(classifBtn) classifBtn.style.display = 'inline-flex';
+    if(classifPopup){ classifPopup.innerHTML = '<img src="img/t-junction/t-junction-tabla.jpg" alt="Tabla clasificación T-junction">'; }
     document.getElementById('cardPedretRef').style.display = 'block';
-    updateTJunctionReference();
+    updateTJunctionReference(null);
 
   } else if(mode==='pedret'){
     clearReferenceCardMode();
@@ -1263,11 +1397,26 @@ if(gradoOptions){
 
     if(musculo === 'gemelos'){
       updatePedretReference(input.value);
+    } else if(musculo === 't-junction'){
+      updateTJunctionReference(input.value);
     }
 
   });
 var pedretHelpBtn = document.getElementById('pedretHelpBtn');
 var pedretHelpPopup = document.getElementById('pedretHelpPopup');
+var classifHelpBtn = document.getElementById('classifHelpBtn');
+var classifHelpPopup = document.getElementById('classifHelpPopup');
+
+if(classifHelpBtn && classifHelpPopup){
+  classifHelpBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    classifHelpPopup.classList.toggle('open');
+    classifHelpPopup.setAttribute(
+      'aria-hidden',
+      classifHelpPopup.classList.contains('open') ? 'false' : 'true'
+    );
+  });
+}
 
 if(pedretHelpBtn && pedretHelpPopup){
   pedretHelpBtn.addEventListener('click', function(e){
@@ -1285,6 +1434,13 @@ if(pedretHelpBtn && pedretHelpPopup){
 
     pedretHelpPopup.classList.remove('open');
     pedretHelpPopup.setAttribute('aria-hidden','true');
+  });
+
+  document.addEventListener('click', function(e){
+    if(!classifHelpPopup || !classifHelpPopup.classList.contains('open')) return;
+    if(e.target === classifHelpBtn || classifHelpPopup.contains(e.target)) return;
+    classifHelpPopup.classList.remove('open');
+    classifHelpPopup.setAttribute('aria-hidden','true');
   });
 }
 }
