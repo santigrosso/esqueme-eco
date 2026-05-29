@@ -269,6 +269,18 @@
   color:#1b2435;
 }
 
+.pedret-ref-head h3{
+  margin:.1rem 0 .6rem 0;
+  text-transform:uppercase;
+  font-size:.95rem;
+  color:#1b2435;
+  text-align:center;
+}
+
+.pedret-ref-head h3 span{
+  text-transform:none;
+}
+
 .pedret-help-btn{
   width:20px;
   height:20px;
@@ -296,7 +308,7 @@
   position:absolute;
   left:.75rem;
   right:.75rem;
-  top:3.9rem;
+  top:3.1rem;
   z-index:20;
 
   background:#ffffff;
@@ -559,10 +571,8 @@
         </div>
       </div>
     <div class="card" id="cardPedretRef">
-  <h3>Referencia</h3>
-
   <div class="pedret-ref-head">
-    <span id="pedretRefTitle">Referencia general</span>
+    <h3 id="pedretRefHeading">REFERENCIA <span id="pedretRefTitle">General</span></h3>
     <button type="button" id="pedretHelpBtn" class="pedret-help-btn">?</button>
   </div>
 
@@ -1152,53 +1162,48 @@ function updatePedretReference(value){
       label: 'Tipo 1',
       img: 'img/pedret/pedret-tipo1.jpg',
       text:
-`TIPO 1
-Lesión de la UMT distal.
-Aponeurosis del gemelo intacta.
-Poco o nada de hematoma.`
+`• Lesión de la UMT distal.
+• Aponeurosis del gemelo intacta.
+• Poco o nada de hematoma.`
     },
 
     'Tipo 2A — Aponeurótica parcial': {
       label: 'Tipo 2a',
       img: 'img/pedret/pedret-tipo2a.jpg',
       text:
-`TIPO 2a
-Rotura parcial de la aponeurosis del gemelo.
-<50% del ancho comprometido.
-Hematoma leve/moderado.
-Sincronía generalmente preservada.`
+`• Rotura parcial de la aponeurosis del gemelo.
+• <50% del ancho comprometido.
+• Hematoma leve/moderado.
+• Sincronía generalmente preservada.`
     },
 
     'Tipo 2B — Aponeurótica extensa': {
       label: 'Tipo 2b',
       img: 'img/pedret/pedret-tipo2b.jpg',
       text:
-`TIPO 2b
-Rotura amplia de la aponeurosis del gemelo.
-50% del ancho comprometido.
-Hematoma importante.
-Asincronía gastrocnemio-sóleo frecuente.`
+`• Rotura amplia de la aponeurosis del gemelo.
+• 50% del ancho comprometido.
+• Hematoma importante.
+• Asincronía gastrocnemio-sóleo frecuente.`
     },
 
     'Tipo 3 — Aponeurosis libre': {
       label: 'Tipo 3',
       img: 'img/pedret/pedret-tipo3.jpg',
       text:
-`TIPO 3
-Lesión distal de la aponeurosis libre del gemelo.
-Poco edema y poco hematoma.
-Comportamiento “tendinoso”.`
+`• Lesión distal de la aponeurosis libre del gemelo.
+• Poco edema y poco hematoma.
+• Comportamiento “tendinoso”.`
     },
 
     'Tipo 4 — Mixta': {
       label: 'Tipo 4',
       img: 'img/pedret/pedret-tipo4.jpg',
       text:
-`TIPO 4
-Lesión tipo 2b + tipo 3.
-Gran disrupción conectiva.
-Hematoma importante.
-Asincronía marcada.`
+`• Lesión tipo 2b + tipo 3.
+• Gran disrupción conectiva.
+• Hematoma importante.
+• Asincronía marcada.`
     }
 
   };
@@ -1213,7 +1218,7 @@ Asincronía marcada.`
     popup.textContent = currentPedretDescription;
   } else {
     img.src = 'img/pedret/pedret-ref.jpg';
-    title.textContent = 'Referencia general';
+    title.textContent = 'General';
     currentPedretDescription = 'Seleccioná un tipo de lesión para ver la referencia correspondiente.';
     popup.textContent = currentPedretDescription;
   }
@@ -1233,20 +1238,18 @@ function updateTJunctionReference(value){
   var data = {
     'Subtipo 1': {
       label: 'Subtipo 1',
-      img: 'img/t-junction/t-junction-subtipo1.png',
+      img: 'img/t-junction/t-junction-subtipo1.jpg',
       text:
-`SUBTIPO 1
-• Discontinuidad limitada al componente mioaponeurótico profundo.
+`• Discontinuidad limitada al componente mioaponeurótico profundo.
 • Componente mio-tendinoso superficial conservado.
 • Sin extensión miofascial ni hematoma.
 • Sincronía dinámica preservada entre ambas cabezas.`
     },
     'Subtipo 2': {
       label: 'Subtipo 2',
-      img: 'img/t-junction/t-junction-subtipo2.png',
+      img: 'img/t-junction/t-junction-subtipo2.jpg',
       text:
-`SUBTIPO 2
-• Compromiso del componente mioaponeurótico profundo.
+`• Compromiso del componente mioaponeurótico profundo.
 • Extensión hacia tejido miofascial.
 • Componente mio-tendinoso superficial conservado.
 • Sin hematoma.
@@ -1254,30 +1257,27 @@ function updateTJunctionReference(value){
     },
     'Subtipo 3': {
       label: 'Subtipo 3',
-      img: 'img/t-junction/t-junction-subtipo3.png',
+      img: 'img/t-junction/t-junction-subtipo3.jpg',
       text:
-`SUBTIPO 3
-• Compromiso combinado mioaponeurótico y mio-tendinoso.
+`• Compromiso combinado mioaponeurótico y mio-tendinoso.
 • Presencia de extensión miofascial.
 • Sin hematoma intermuscular.
 • Sincronía dinámica conservada.`
     },
     'Subtipo 4': {
       label: 'Subtipo 4',
-      img: 'img/t-junction/t-junction-subtipo4.png',
+      img: 'img/t-junction/t-junction-subtipo4.jpg',
       text:
-`SUBTIPO 4
-• Lesión multicapa con compromiso mioaponeurótico y mio-tendinoso.
+`• Lesión multicapa con compromiso mioaponeurótico y mio-tendinoso.
 • Extensión miofascial asociada.
 • Presencia de hematoma intermuscular.
 • Sincronía dinámica preservada.`
     },
     'Subtipo 5': {
       label: 'Subtipo 5',
-      img: 'img/t-junction/t-junction-subtipo5.png',
+      img: 'img/t-junction/t-junction-subtipo5.jpg',
       text:
-`SUBTIPO 5
-• Lesión multicapa con extensión miofascial y hematoma.
+`• Lesión multicapa con extensión miofascial y hematoma.
 • Compromiso mioaponeurótico y mio-tendinoso.
 • Movimiento asincrónico entre cabeza larga y corta.
 • Presencia de “gapping” dinámico durante la contracción.`
@@ -1292,8 +1292,8 @@ function updateTJunctionReference(value){
     title.textContent = data[value].label;
     popup.textContent = data[value].text;
   } else {
-    img.src = 'img/t-junction/t-junction-ref.png';
-    title.textContent = 'Referencia general';
+    img.src = 'img/t-junction/t-junction-ref.jpg';
+    title.textContent = 'General';
     popup.textContent = 'Seleccioná un subtipo para ver la referencia correspondiente.';
   }
 }
