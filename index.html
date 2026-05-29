@@ -400,11 +400,59 @@
   border-radius:.45rem;
 }
 
+
+
+/* ===== Ayuda por grado BAMIC ===== */
+.bamic-help-wrap{
+  display:flex;
+  align-items:center;
+  gap:.4rem;
+  position:relative;
+}
+
+.bamic-help-btn{
+  width:20px;
+  height:20px;
+  border-radius:50%;
+  border:1px solid #8fa7c7;
+  background:#e8eef7;
+  color:#1F2D53;
+  font-weight:800;
+  font-size:.75rem;
+  line-height:1;
+  cursor:pointer;
+  flex:0 0 auto;
+}
+
+.bamic-help-popup{
+  display:none;
+  position:absolute;
+  left:.25rem;
+  right:.25rem;
+  top:1.9rem;
+  z-index:30;
+  background:#ffffff;
+  border:1px solid #b9c6d9;
+  border-radius:.65rem;
+  padding:.7rem .8rem;
+  font-size:.82rem;
+  line-height:1.28;
+  color:#1b2435;
+  white-space:pre-line;
+  box-shadow:0 8px 24px rgba(0,0,0,.18);
+}
+
+.bamic-help-popup.open{
+  display:block;
+}
+
 @media print{
   .pedret-help-btn,
   .pedret-help-popup,
   .classif-help-btn,
-  .classif-help-popup{
+  .classif-help-popup,
+  .bamic-help-btn,
+  .bamic-help-popup{
     display:none!important;
   }
 }
@@ -1376,15 +1424,96 @@ updatePedretReference(null);
     clearReferenceCardMode();
     document.getElementById('cardPedretRef').style.display = 'none';
     document.querySelector('#cardGrado h3').textContent = 'Grado';
-    html += '\n<label><input type="radio" name="grado" value="Grado 1"> Grado 1</label>';
-    html += '\n<label><input type="radio" name="grado" value="Grado 2"> Grado 2</label>';
-    html += '\n<label><input type="radio" name="grado" value="Grado 3"> Grado 3</label>';
-    html += '\n<label><input type="radio" name="grado" value="Grado 4"> Grado 4</label>';
+    html += '\n<label class="bamic-help-wrap"><input type="radio" name="grado" value="Grado 1"> <span>Grado 1</span><button type="button" class="bamic-help-btn" data-bamic-grade="Grado 1">?</button><div class="bamic-help-popup" aria-hidden="true"></div></label>';
+    html += '\n<label class="bamic-help-wrap"><input type="radio" name="grado" value="Grado 2"> <span>Grado 2</span><button type="button" class="bamic-help-btn" data-bamic-grade="Grado 2">?</button><div class="bamic-help-popup" aria-hidden="true"></div></label>';
+    html += '\n<label class="bamic-help-wrap"><input type="radio" name="grado" value="Grado 3"> <span>Grado 3</span><button type="button" class="bamic-help-btn" data-bamic-grade="Grado 3">?</button><div class="bamic-help-popup" aria-hidden="true"></div></label>';
+    html += '\n<label class="bamic-help-wrap"><input type="radio" name="grado" value="Grado 4"> <span>Grado 4</span><button type="button" class="bamic-help-btn" data-bamic-grade="Grado 4">?</button><div class="bamic-help-popup" aria-hidden="true"></div></label>';
     gradoOptions.innerHTML=html; cardTejido.style.display='block';
   } 
 }
   if(gradoMode){ gradoMode.addEventListener('click', function(e){ var b=e.target && e.target.closest ? e.target.closest('button[data-mode]') : null; if(!b) return; Array.prototype.slice.call(gradoMode.querySelectorAll('button')).forEach(function(x){ x.classList.remove('active'); }); b.classList.add('active'); renderGrado(b.getAttribute('data-mode')); }); }
 if(gradoOptions){
+
+  var bamicGradeDescriptions = {
+    'Grado 1':
+`Examen:
+• Dolor durante o después de la actividad.
+• ROM a las 24 hs normal.
+• Buena capacidad de contracción.
+
+Imagen:
+• Edema menor al 10% del área de sección transversal.
+• Edema menor a 5 cm de longitud céfalo-caudal.
+• Sin disrupción del patrón fibrilar o menor a 1 cm.`,
+
+    'Grado 2':
+`Examen:
+• Dolor durante la actividad que impide continuar.
+• ROM limitado a las 24 hs.
+• Dolor y/o déficit de fuerza en contracción.
+
+Imagen tipo a y b:
+• Edema entre 10% y 50% del área de sección transversal.
+• Edema entre 5 cm y 15 cm de longitud céfalo-caudal.
+• Disrupción del patrón fibrilar menor a 5 cm.
+
+Imagen tipo c:
+• Compromiso menor a 5 cm de longitud del tendón.
+• Compromiso menor al 50% del diámetro del tendón.`,
+
+    'Grado 3':
+`Examen:
+• Dolor de aparición repentina que puede provocar la caída.
+• ROM muy reducido a las 24 hs con dolor al caminar.
+• Debilidad evidente en la contracción.
+
+Imagen tipo a y b:
+• Edema mayor al 50% del área de sección transversal.
+• Edema mayor a 15 cm de longitud céfalo-caudal.
+
+Imagen tipo c:
+• Compromiso mayor a 5 cm de longitud del tendón.
+• Compromiso mayor al 50% del diámetro del tendón.
+• Puede haber pérdida de tensión.`,
+
+    'Grado 4':
+`Examen:
+• Dolor repentino.
+• Limitación significativa e inmediata.
+• Defecto palpable.
+• Puede haber menor dolor a la activación que en grado 3.
+
+Imagen:
+• Ruptura completa del músculo o tendón.`
+  };
+
+  gradoOptions.addEventListener('click', function(e){
+    var btn = e.target && e.target.closest
+      ? e.target.closest('.bamic-help-btn')
+      : null;
+
+    if(!btn) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    var wrap = btn.closest('.bamic-help-wrap');
+    var popup = wrap ? wrap.querySelector('.bamic-help-popup') : null;
+    if(!popup) return;
+
+    var wasOpen = popup.classList.contains('open');
+
+    document.querySelectorAll('.bamic-help-popup.open').forEach(function(p){
+      p.classList.remove('open');
+      p.setAttribute('aria-hidden','true');
+    });
+
+    if(!wasOpen){
+      popup.textContent = bamicGradeDescriptions[btn.getAttribute('data-bamic-grade')] || '';
+      popup.classList.add('open');
+      popup.setAttribute('aria-hidden','false');
+    }
+  });
 
   gradoOptions.addEventListener('change', function(e){
 
@@ -1441,6 +1570,14 @@ if(pedretHelpBtn && pedretHelpPopup){
     if(e.target === classifHelpBtn || classifHelpPopup.contains(e.target)) return;
     classifHelpPopup.classList.remove('open');
     classifHelpPopup.setAttribute('aria-hidden','true');
+  });
+
+  document.addEventListener('click', function(e){
+    if(e.target && e.target.closest && e.target.closest('.bamic-help-btn, .bamic-help-popup')) return;
+    document.querySelectorAll('.bamic-help-popup.open').forEach(function(p){
+      p.classList.remove('open');
+      p.setAttribute('aria-hidden','true');
+    });
   });
 }
 }
